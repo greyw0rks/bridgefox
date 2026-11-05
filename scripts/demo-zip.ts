@@ -1,0 +1,17 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import JSZip from "jszip";
+import { DEMO } from "../src/lib/demo";
+import { migrate } from "../src/lib/migrate";
+import { exportZip } from "../src/lib/export";
+await mkdir("public/examples", { recursive: true });
+const zip = new JSZip();
+for (const file of DEMO.files) zip.file(file.path, file.content);
+await writeFile("public/examples/tab-pocket-chrome.zip", await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
+const migration = await migrate(DEMO, "local", () => {});
+await mkdir("fixtures/tab-pocket", { recursive: true });
+for (const file of migration.project.files) await writeFile(`fixtures/tab-pocket/${file.path}`, file.content);
+const output = await exportZip(DEMO, migration.patches);
+await mkdir("artifacts", { recursive: true });
+await writeFile("artifacts/tab-pocket-firefox.zip", output.bytes);
+await writeFile("artifacts/tab-pocket-report.json", JSON.stringify(migration, null, 2));
+console.log(`Chrome fixture: public/examples/tab-pocket-chrome.zip\nFirefox fixture: fixtures/tab-pocket\nExport: artifacts/tab-pocket-firefox.zip\n${migration.patches.length} patches, ${migration.report.findings.length} remaining static findings.`);

@@ -1,0 +1,13 @@
+{
+  "testedAt": "2026-11-05T02:09:43Z",
+  "firefox": "141.0",
+  "driver": "Mozilla geckodriver",
+  "addonId": "bridgefox-46cafaabdd2626f3f3f4@bridgefox.local",
+  "installedExportedZip": true,
+  "activeTabGrant": "Native Firefox permission grant simulating a toolbar activation in the fresh test profile",
+  "savedRealFirefoxTab": true,
+  "storageSurvivedPopupReload": true,
+  "reopenedSavedTab": true,
+  "liveOtariCalls": 0,
+  "scope": "Authored Tab Pocket fixture in a temporary Firefox profile; not a universal compatibility proof or participant video."
+}

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Pocket",
+  "version": "1.0.0",
+  "description": "Save the current tab and open it again from your pocket.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Tab Pocket"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      },
+      "id": "bridgefox-46cafaabdd2626f3f3f4@bridgefox.local"
+    }
+  }
+}

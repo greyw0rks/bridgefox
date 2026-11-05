@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.env*
+!.env.example
+.data/
+artifacts/
+*.tsbuildinfo
+web-ext-artifacts/
+.atlas/
+__pycache__/
+*.pyc

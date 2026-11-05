@@ -1,0 +1,15 @@
+{
+  "testedAt": "2026-11-05T02:09:07.343Z",
+  "base": "http://localhost:3035",
+  "checks": [
+    "Overview at 1440/1024/768/390/360 without horizontal overflow",
+    "Demo import, manifest findings, Mozilla API members and permissions",
+    "Streamed local migration with real source diff and activity",
+    "Workspace responsive at desktop/tablet/mobile",
+    "Candidate ZIP downloads and runtime test remains explicitly open",
+    "Actual local history, search, and accessible modal dismissal",
+    "ZIP upload via the actual import endpoint"
+  ],
+  "errors": [],
+  "liveOtariCalls": 0
+}

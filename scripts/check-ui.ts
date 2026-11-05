@@ -1,0 +1,73 @@
+import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
+import { chromium } from "@playwright/test";
+const base = process.env.BRIDGEFOX_TEST_URL ?? "http://localhost:3035";
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, acceptDownloads: true });
+const page = await context.newPage();
+const errors: string[] = [];
+page.on("pageerror", e => errors.push(e.message));
+page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
+await mkdir("artifacts/ui", { recursive: true });
+const checks: string[] = [];
+try {
+  await page.goto(base);
+  await page.getByRole("heading", { name: "Chrome extensions. Firefox freedom." }).waitFor();
+  await page.screenshot({ path: "artifacts/ui/overview-desktop.png", fullPage: true });
+  for (const width of [1440, 1024, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 1000 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, `Overview overflow at ${width}`);
+    if (width === 390) await page.screenshot({ path: "artifacts/ui/overview-mobile.png", fullPage: true });
+  }
+  checks.push("Overview at 1440/1024/768/390/360 without horizontal overflow");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "Try an example", exact: true }).click();
+  await page.getByRole("heading", { name: "Tab Pocket" }).waitFor();
+  await page.getByRole("heading", { name: "Background service worker needs a Firefox script" }).waitFor();
+  await page.getByRole("tab", { name: /API compatibility/ }).click();
+  await page.getByText("tabs.query", { exact: true }).waitFor();
+  await page.getByRole("tab", { name: /Permissions/ }).click();
+  await page.getByText("activeTab", { exact: true }).waitFor();
+  await page.getByRole("tab", { name: /Findings/ }).click();
+  await page.screenshot({ path: "artifacts/ui/compatibility.png", fullPage: true });
+  checks.push("Demo import, manifest findings, Mozilla API members and permissions");
+  await page.getByRole("button", { name: "Generate migration", exact: true }).click();
+  await page.getByText("Proposals ready for review", { exact: true }).waitFor();
+  await page.getByRole("button", { name: "Review & export", exact: true }).waitFor();
+  const proposal = page.getByLabel("Firefox source changes");
+  assert.match(await proposal.textContent() ?? "", /"scripts"/);
+  assert.doesNotMatch(await proposal.textContent() ?? "", /service_worker/);
+  assert.match(await page.getByLabel("Original Chrome source").textContent() ?? "", /service_worker/);
+  await page.screenshot({ path: "artifacts/ui/workspace.png", fullPage: true });
+  checks.push("Streamed local migration with real source diff and activity");
+  for (const width of [1440, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 1000 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, `Workspace overflow at ${width}`);
+  }
+  checks.push("Workspace responsive at desktop/tablet/mobile");
+  await page.getByRole("button", { name: "Review & export", exact: true }).click();
+  await page.getByRole("heading", { name: "Validation results" }).waitFor();
+  await page.getByRole("heading", { name: /Firefox runtime/ }).waitFor();
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download Firefox ZIP", exact: true }).click()]);
+  assert.equal(download.suggestedFilename(), "Tab-Pocket-firefox.zip");
+  await download.saveAs("artifacts/ui/Tab-Pocket-firefox.zip");
+  await page.screenshot({ path: "artifacts/ui/export-mobile.png", fullPage: true });
+  checks.push("Candidate ZIP downloads and runtime test remains explicitly open");
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole("button", { name: "All migrations", exact: true }).click();
+  await page.getByRole("button", { name: /Tab Pocket.*Candidate/ }).waitFor();
+  await page.getByLabel("Search migration history").fill("missing-extension");
+  await page.getByRole("heading", { name: "No matching migrations" }).waitFor();
+  await page.getByLabel("Search migration history").fill("");
+  await page.getByRole("button", { name: /Tab Pocket.*Candidate/ }).click();
+  await page.getByRole("dialog").waitFor();
+  await page.keyboard.press("Escape");
+  assert.equal(await page.getByRole("dialog").isVisible(), false);
+  checks.push("Actual local history, search, and accessible modal dismissal");
+  await page.getByLabel("Choose extension source ZIP").setInputFiles("public/examples/tab-pocket-chrome.zip");
+  await page.getByRole("heading", { name: "Tab Pocket" }).waitFor();
+  checks.push("ZIP upload via the actual import endpoint");
+  assert.deepEqual(errors, []);
+  await writeFile("artifacts/ui/checks.json", JSON.stringify({ testedAt: new Date().toISOString(), base, checks, errors, liveOtariCalls: 0 }, null, 2));
+  console.log(checks.map(c => `PASS ${c}`).join("\n"));
+} finally { await browser.close(); }
