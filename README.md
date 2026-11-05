@@ -24,8 +24,11 @@ The existing `.env.local` in this workspace is private. Do not overwrite it when
 - Public GitHub branch import through a fixed GitHub download host, with the same archive limits.
 - Manifest V2/V3 detection, missing-resource checks, JavaScript parsing, and individual API-member checks using a committed Mozilla browser compatibility data snapshot.
 - Conservative MV3 `background.service_worker` → `background.scripts` proposals and stable Firefox test identities. Compatible `chrome.*` calls are preserved.
-- Source diffs, permission-preserving patch validation, local report history, validation results, and downloadable Firefox candidates.
+- Syntax-highlighted source review with split/unified diffs, file search and editor focus, permission-preserving patch validation, local report history, validation results, and downloadable Firefox candidates.
+- A responsive cream/coral/lavender studio, two alternative palettes, and Framer Motion interactions with persistent motion controls and device reduced-motion support.
 - Server-side Otari integration: documentation fetch, a compatibility analyst and migration engineer, optional blocking gateway guardrails, authored sandbox validation, reported usage and fallback headers, and a per-job spending threshold.
+
+See [docs/DESIGN.md](docs/DESIGN.md) for the visual system and interaction details.
 
 ## Otari setup
 

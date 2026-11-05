@@ -1,15 +1,22 @@
 {
-  "testedAt": "2026-11-05T02:09:07.343Z",
+  "testedAt": "2026-11-05T03:03:37.703Z",
   "base": "http://localhost:3035",
   "checks": [
     "Overview at 1440/1024/768/390/360 without horizontal overflow",
+    "Three functional palettes, quick cycling, native settings dialog, and saved preferences",
+    "Decorative Framer Motion runs when enabled, stops when paused, and honors reduced motion",
     "Demo import, manifest findings, Mozilla API members and permissions",
     "Streamed local migration with real source diff and activity",
+    "Source search, empty results, file selection, unified additions/removals, and editor focus",
     "Workspace responsive at desktop/tablet/mobile",
     "Candidate ZIP downloads and runtime test remains explicitly open",
     "Actual local history, search, and accessible modal dismissal",
     "ZIP upload via the actual import endpoint"
   ],
   "errors": [],
-  "liveOtariCalls": 0
+  "liveOtariCalls": 0,
+  "build": "production",
+  "additionalChecks": [
+    "1920px three-column workspace, dark syntax theme, and full-width editor focus"
+  ]
 }
