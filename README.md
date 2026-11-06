@@ -18,6 +18,18 @@ Open **http://localhost:3035**. Choose **Try an example** to migrate Tab Pocket 
 
 The existing `.env.local` in this workspace is private. Do not overwrite it when it already contains your key.
 
+## Example source ZIPs
+
+With the app running, download a ZIP below and upload it on the import screen:
+
+- [Tab Pocket](http://localhost:3035/examples/tab-pocket-chrome.zip): the original project fixture; its Otari-reviewed Firefox output has been runtime-tested.
+- [Google Focus Mode](http://localhost:3035/examples/google-focus-mode-chrome.zip): an MV3 background/action/scripting example.
+- [Google Reading Time](http://localhost:3035/examples/google-reading-time-chrome.zip): an MV3 content-script example.
+
+The Google examples come from [Chrome extension samples](https://github.com/GoogleChrome/chrome-extensions-samples), revision `b7d8bebb00bb11191126c6abbe471ec5f79c4feb`, folders `functional-samples/tutorial.focus-mode` and `functional-samples/tutorial.reading-time`. Their source files are unchanged, with the upstream license and a provenance note included. Both pass BridgeFox's ZIP import and scan; neither has been verified in Firefox here. Their missing Firefox data-collection declarations require an author decision. ZIPs are under `public/examples/`.
+
+Use the individual sample ZIPs: the full Google samples repository contains multiple extension roots and is unsuitable for this MVP's whole-repository import. Other GitHub imports should identify a small repository containing one built extension root.
+
 ## What works
 
 - Bounded ZIP extraction with traversal, symlink, duplicate-entry, and size checks; binary assets and license files preserved.

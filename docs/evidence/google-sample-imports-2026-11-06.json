@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-11-06T22:52:48.908Z",
+  "checks": [
+    {
+      "folder": "tutorial.focus-mode",
+      "output": "/home/greyw0rks/bridgefox/public/examples/google-focus-mode-chrome.zip",
+      "source": "https://github.com/GoogleChrome/chrome-extensions-samples/tree/b7d8bebb00bb11191126c6abbe471ec5f79c4feb/functional-samples/tutorial.focus-mode",
+      "revision": "b7d8bebb00bb11191126c6abbe471ec5f79c4feb",
+      "bytes": 32021,
+      "publicUrl": "http://localhost:3035/examples/google-focus-mode-chrome.zip",
+      "sha256": "777ec225b4d479a3869a068c761f644828dabf05d31c8cb9b6a29d172f063ee5",
+      "importStatus": 200,
+      "name": "Focus mode",
+      "manifestVersion": 3,
+      "fileCount": 10,
+      "findings": [
+        {
+          "rule": "service-worker",
+          "severity": "change",
+          "title": "Background service worker needs a Firefox script"
+        },
+        {
+          "rule": "data-collection",
+          "severity": "warning",
+          "title": "Declare Firefox data collection"
+        }
+      ],
+      "downloadStatus": 200,
+      "downloadMatches": true,
+      "scope": "Source ZIP import only; no Otari calls or Firefox runtime testing."
+    },
+    {
+      "folder": "tutorial.reading-time",
+      "output": "/home/greyw0rks/bridgefox/public/examples/google-reading-time-chrome.zip",
+      "source": "https://github.com/GoogleChrome/chrome-extensions-samples/tree/b7d8bebb00bb11191126c6abbe471ec5f79c4feb/functional-samples/tutorial.reading-time",
+      "revision": "b7d8bebb00bb11191126c6abbe471ec5f79c4feb",
+      "bytes": 36306,
+      "publicUrl": "http://localhost:3035/examples/google-reading-time-chrome.zip",
+      "sha256": "26e0271cd3eebe712fc85194ee804077ce3c0c7c033e7bb983d02fe5add5497f",
+      "importStatus": 200,
+      "name": "Reading time estimate",
+      "manifestVersion": 3,
+      "fileCount": 9,
+      "findings": [
+        {
+          "rule": "data-collection",
+          "severity": "warning",
+          "title": "Declare Firefox data collection"
+        }
+      ],
+      "downloadStatus": 200,
+      "downloadMatches": true,
+      "scope": "Source ZIP import only; no Otari calls or Firefox runtime testing."
+    }
+  ]
+}
