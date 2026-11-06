@@ -56,8 +56,9 @@ export async function gatewayCall(path: string, body: unknown | undefined, label
   const activity: Activity = {
     id, label, status: response.ok ? "complete" : "failed", origin: "otari", timestamp: new Date().toISOString(), requestId, costUsd,
     model: response.headers.get("Otari-Model") ?? data.model ?? undefined,
-    fallback: response.headers.get("Otari-Fallback") === "true", attempts: Number(response.headers.get("Otari-Attempt-Count")) || undefined,
-    data: { guardrails: response.headers.get("Otari-Guardrails") ?? undefined, provider: response.headers.get("Otari-Provider") ?? undefined },
+    fallback: response.headers.has("Otari-Fallback") ? response.headers.get("Otari-Fallback") === "true" : undefined, attempts: Number(response.headers.get("Otari-Attempt-Count")) || undefined,
+    data: { guardrails: response.headers.get("Otari-Guardrails") ?? undefined, provider: response.headers.get("Otari-Provider") ?? undefined,
+      finishReason: data.choices?.[0]?.finish_reason, promptTokens: data.usage?.prompt_tokens, completionTokens: data.usage?.completion_tokens },
     detail: response.ok ? `Otari responded in ${((Date.now() - started) / 1000).toFixed(1)}s.` : `Otari returned HTTP ${response.status}${response.headers.get("Otari-Error-Code") ? ` (${response.headers.get("Otari-Error-Code")})` : ""}. ${response.status === 402 ? "Check account funds, key budget, and model/tool pricing." : "Check the account's model, tool and guardrail settings."}`
   };
   if (!response.ok) throw new GatewayError(activity.detail, activity);
@@ -65,6 +66,9 @@ export async function gatewayCall(path: string, body: unknown | undefined, label
 }
 export function completionText(body: Record<string, any>): string {
   const content = body.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) throw new Error("Otari model returned no text response");
+  if (typeof content !== "string" || !content.trim()) {
+    const reason = body.choices?.[0]?.finish_reason;
+    throw new Error(`Otari model returned no text response${reason === "length" ? "; the output token limit was reached. Use a non-reasoning model for structured proposals or adjust the model's output settings" : ""}`);
+  }
   return content;
 }

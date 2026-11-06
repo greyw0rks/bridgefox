@@ -9,8 +9,8 @@ In `.env.local`:
 ```dotenv
 OTARI_BASE_URL=https://eu.api.otari.ai/api/v1
 OTARI_API_KEY=YOUR_PRIVATE_KEY
-OTARI_ANALYST_MODEL=alibaba/qwen-3.5-35b-a3b
-OTARI_ENGINEER_MODEL=CHOOSE_ANOTHER_AVAILABLE_OPEN_WEIGHT_MODEL
+OTARI_ANALYST_MODEL=alibaba/qwen3-235b-a22b-instruct-2507
+OTARI_ENGINEER_MODEL=alibaba/qwen3-coder-30b-a3b-instruct
 OTARI_GUARDRAIL_PROFILE=
 BRIDGEFOX_JOB_BUDGET_USD=0.50
 BRIDGEFOX_ACCESS_TOKEN=
@@ -21,6 +21,10 @@ Fill placeholders privately, then restart Next.js. The analyst and engineer iden
 Attach an actual spending ceiling to the Otari API key. Configure role-specific routing/fallback policies in the dashboard if demonstrating routing. Set `OTARI_GUARDRAIL_PROFILE` only to a profile that exists on your deployment; requests use `mode: block` and `on_unavailable: block`.
 
 The workspace settings panel shows configuration presence, not a verified connection. Tool availability is inspected during a user-triggered AI migration. Once configured, choose **Otari · two-model workflow** in the compatibility screen.
+
+For a deliberate paid verification with the app running, use `npm run check:otari -- --run`. It sends one migration through the actual local API, saves streamed activities and the result, and exports the candidate under `artifacts/otari/`. It never retries a paid operation. Check the retained usage before running it again after a failure.
+
+The current selected weights are Apache 2.0: [Qwen3-235B-A22B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507) and [Qwen3-Coder-30B-A3B-Instruct](https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct). The catalogue and pinned license references are retained in [connection evidence](evidence/otari-connection-2026-11-06.json).
 
 ## Actual request sequence
 
@@ -34,11 +38,15 @@ The workspace settings panel shows configuration presence, not a verified connec
 
 The client uses `Otari-Key`, follows no redirects, sends no automatic retries, and reads `Otari-Request-ID`, `Otari-Model`, `Otari-Provider`, `Otari-Fallback`, `Otari-Attempt-Count`, and `Otari-Guardrails`. These are reported only when received. A gateway routing policy controls actual fallback behavior; the application does not invent a fallback after a timeout.
 
+The analyst requests JSON response mode. The hosted coder rejected this parameter despite catalogue support, so the engineer relies on the JSON-only prompt and strict local schema. Invalid or empty proposals mark the role failed and retain its actual billed cost. The activity metadata includes the returned finish reason and token counts without storing model reasoning.
+
 ## Costs and failures
 
 Inline `usage.cost_usd` is used when provided. Otherwise a returned request ID is looked up through `GET /usage/requests/{id}`. Because settlement can be delayed, a 404 is polled up to four times with short delays; the paid operation is never repeated. If cost remains unknown, further paid calls stop; an unknown cost is never treated as free. The local job threshold prevents subsequent calls after reaching the threshold and cannot prevent the current request from exceeding it. Gateway key ceilings remain necessary. Other clients and concurrent jobs are outside this local threshold.
 
-On HTTP 402, inspect account funds, key/workspace budgets, and model/tool pricing or allowance. This workspace’s one requested `Hello` completion returned 402 on November 5, 2026. The response body was not retained, so the specific cause is unconfirmed. No automatic retry or successful assistant reply was recorded. Further live paid verification remains pending.
+On HTTP 402, inspect account funds, key/workspace budgets, and model/tool pricing or allowance. The first requested `Hello` completion returned 402 on November 5, 2026; its specific cause remains unconfirmed. After the user funded the account, the November 6 two-model workflow and Python sandbox completed for **$0.010456**. The earlier funded analyst attempt returned no answer and reached its 3,000-token cap ($0.003171). A second run's analyst completed ($0.000192), but its engineer was rejected with `unsupported_parameter`, zero token usage, and a null cost. Those failures and the uncertainty are retained in the connection evidence; they are not counted as successful migrations.
+
+The successful analyst resolved to `Qwen/Qwen3-235B-A22B-Instruct-2507` on DeepInfra. The engineer resolved to `qwen.qwen3-coder-30b-a3b-v1:0` on Bedrock. Both reported one attempt and no fallback. The sandbox returned exit code 0 and `PASS: manifest version, background entrypoints, and permission preservation`. It cost $0.01; the two model requests cost $0.000178 and $0.000278. Web fetch was skipped because the workspace reported `workspace_disabled`. See [live evidence](evidence/otari-migration-2026-11-06.json).
 
 Failed or unavailable steps appear as failed/skipped. Accepted local changes remain reviewable when the AI workflow stops. A candidate exported after an interrupted AI workflow must be treated as a local/static candidate, with the failed AI steps visible in its report.
 
@@ -46,11 +54,11 @@ Failed or unavailable steps appear as failed/skipped. Accepted local changes rem
 
 | Capability | Implementation | Evidence needed before claiming points |
 | --- | --- | --- |
-| Open-weight models | Role-specific model configuration | Successful requests using eligible models and their license references |
-| Multiple models | Separate analyst and engineer calls | Two distinct resolved models used for the separate roles |
+| Open-weight models | Role-specific model configuration | Demonstrated November 6 with two Qwen models; pinned Apache 2.0 weight references in connection evidence |
+| Multiple models | Separate analyst and engineer calls | Demonstrated with distinct resolved Qwen3 Instruct and Qwen3-Coder models |
 | Routing/fallback | Policy names + returned serving/attempt/fallback headers | A genuine routed request demonstrating the claimed routing behavior |
-| Web fetch | Direct Otari fetch supplies documentation to the analyst | Successful fetch and its downstream use |
-| Code execution | Direct Otari sandbox manifest validator | Successful sandbox response and checks demonstrated |
+| Web fetch | Direct Otari fetch supplies documentation to the analyst when enabled | Pending: workspace reports web fetch disabled |
+| Code execution | Direct Otari sandbox manifest validator | Demonstrated November 6: exit 0, background/manifest/permission assertions passed |
 | Budgets | Job threshold + gateway key ceiling | Real gateway budget configuration and a demonstrated enforced limit |
 | Guardrails | Optional fail-closed request checks | A genuine returned gateway verdict or blocked request |
 

@@ -1,0 +1,185 @@
+{
+  "checkedAt": "2026-11-06T22:39:28.854Z",
+  "directory": "artifacts/otari/2026-11-06T22-39-12-994Z",
+  "mode": "otari",
+  "status": "candidate",
+  "spentUsd": 0.010456,
+  "costComplete": true,
+  "budgetUsd": 0.5,
+  "original": "Authored MIT Tab Pocket fixture",
+  "patches": [
+    {
+      "path": "manifest.json",
+      "origin": "rules",
+      "reason": "Use Firefox MV3 background scripts while keeping the original worker source and module type. Assign a stable local Firefox add-on ID for temporary testing. This does not register or sign the add-on."
+    }
+  ],
+  "activities": [
+    {
+      "id": "bca84b81-f055-4702-ab8d-d794a8c71acf",
+      "label": "Compatibility scan",
+      "detail": "6 files analyzed; 1 findings.",
+      "status": "complete",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:13.239Z"
+    },
+    {
+      "id": "8ab955c3-b5ef-4a82-9db6-1136bc9f9bd9",
+      "label": "Deterministic migration",
+      "detail": "1 file patches proposed; all original permissions preserved.",
+      "status": "complete",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:13.257Z"
+    },
+    {
+      "id": "ff087b1b-a27d-4260-81dd-3a2929ff8c73",
+      "label": "Gateway tool discovery",
+      "status": "complete",
+      "origin": "otari",
+      "timestamp": "2026-11-06T22:39:13.871Z",
+      "data": {},
+      "detail": "Otari responded in 0.6s."
+    },
+    {
+      "id": "7af35957-3ec7-42bf-9f37-ccea01191a41",
+      "label": "Firefox documentation fetch",
+      "detail": "Otari web fetch is unavailable on this key. Static MDN references remain in the report.",
+      "status": "skipped",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:13.872Z"
+    },
+    {
+      "id": "a5769867-f11f-4b3e-9e56-80d88cc46281",
+      "label": "Compatibility analyst",
+      "status": "complete",
+      "origin": "otari",
+      "timestamp": "2026-11-06T22:39:23.888Z",
+      "requestId": "2a0e3aa0-c136-4394-8cb0-02435cdfdcd3",
+      "costUsd": 0.000178,
+      "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "fallback": false,
+      "attempts": 1,
+      "data": {
+        "provider": "deepinfra",
+        "finishReason": "stop",
+        "promptTokens": 1216,
+        "completionTokens": 124
+      },
+      "detail": "Otari responded in 10.0s."
+    },
+    {
+      "id": "bbea5208-717f-4d3b-b9b3-ee5e4e70703c",
+      "label": "Migration engineer",
+      "status": "complete",
+      "origin": "otari",
+      "timestamp": "2026-11-06T22:39:25.355Z",
+      "requestId": "6a454395-342f-42a2-8883-77561629f946",
+      "costUsd": 0.000278,
+      "model": "qwen.qwen3-coder-30b-a3b-v1:0",
+      "fallback": false,
+      "attempts": 1,
+      "data": {
+        "provider": "bedrock",
+        "finishReason": "stop",
+        "promptTokens": 1385,
+        "completionTokens": 117
+      },
+      "detail": "Otari responded in 1.5s."
+    },
+    {
+      "id": "1e0e12be-e885-4564-a2db-5011373cfd05",
+      "label": "Patch guardrails",
+      "detail": "0 AI file proposals accepted for review. Manifest permissions and feature declarations are preserved.",
+      "status": "complete",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:25.370Z"
+    },
+    {
+      "id": "69964144-a12f-4d49-9327-b885c2285071",
+      "label": "AI review note",
+      "detail": "The extension includes browser_specific_settings for Gecko, which may imply intended Firefox-specific behavior that requires manual validation.",
+      "status": "complete",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:25.370Z"
+    },
+    {
+      "id": "dd8a34a5-9969-4688-9799-3990bb4b33bd",
+      "label": "AI review note",
+      "detail": "No network requests are made, reducing risk, but the long-term stability of browser_specific_settings.data_collection_permissions should be verified in Firefox.",
+      "status": "complete",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:25.370Z"
+    },
+    {
+      "id": "bbdf86fa-5e56-42c6-affb-f6792e70f357",
+      "label": "Sandbox manifest validation",
+      "status": "complete",
+      "origin": "otari",
+      "timestamp": "2026-11-06T22:39:28.639Z",
+      "requestId": "510b47e1-3d3a-442a-bf90-b7917fb86bc5",
+      "costUsd": 0.01,
+      "data": {
+        "returnCode": 0,
+        "stdout": "PASS: manifest version, background entrypoints, and permission preservation\n",
+        "stderr": ""
+      },
+      "detail": "PASS: manifest version, background entrypoints, and permission preservation\n"
+    },
+    {
+      "id": "66beeeb2-3e62-4607-a837-1e45e0fcd77c",
+      "label": "Static validation",
+      "detail": "5 checks passed. Firefox runtime testing is still required.",
+      "status": "complete",
+      "origin": "local",
+      "timestamp": "2026-11-06T22:39:28.662Z"
+    }
+  ],
+  "validations": [
+    {
+      "name": "Manifest & referenced files",
+      "status": "passed",
+      "detail": "Required fields, manifest version, and declared background, popup, icons and content-script resources checked."
+    },
+    {
+      "name": "JavaScript syntax",
+      "status": "passed",
+      "detail": "JavaScript parsed as source; no uploaded code was run."
+    },
+    {
+      "name": "Permission preservation",
+      "status": "passed",
+      "detail": "Required and optional permissions and host access are unchanged."
+    },
+    {
+      "name": "Compatibility rules",
+      "status": "passed",
+      "detail": "0 blockers; 0 findings need review. API detection is best effort, not a full semantic proof."
+    },
+    {
+      "name": "Firefox runtime",
+      "status": "review",
+      "detail": "Load temporarily in desktop Firefox using about:debugging and test every extension feature. Static checks cannot certify runtime compatibility."
+    },
+    {
+      "name": "Otari sandbox manifest check",
+      "status": "passed",
+      "detail": "PASS: manifest version, background entrypoints, and permission preservation\n"
+    }
+  ],
+  "distinctResolvedModels": true,
+  "export": {
+    "bytes": 2540,
+    "sha256": "3e41fce68d0da0b726d3f7eccfc00988be3929f6219b8b60f452faa6f74130d0"
+  },
+  "scope": "One real migration through the local Next.js API; runtime compatibility needs a separate Firefox check.",
+  "summary": "The extension uses standard Chrome APIs that are fully supported in Firefox under Manifest V3. No functional code changes are required. The manifest includes browser-specific settings for Gecko, which may indicate Firefox customization and should be manually reviewed.",
+  "remainingFindings": [],
+  "addonLint": {
+    "tool": "web-ext",
+    "version": "10.8.0",
+    "errors": 0,
+    "notices": 0,
+    "warnings": 0,
+    "source": "Exact unpacked exported ZIP"
+  }
+}

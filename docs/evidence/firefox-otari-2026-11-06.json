@@ -1,0 +1,45 @@
+{
+  "testedAt": "2026-11-06T22:39:55Z",
+  "firefox": "141.0",
+  "driver": "Mozilla geckodriver",
+  "addonId": "bridgefox-46cafaabdd2626f3f3f4@bridgefox.local",
+  "installedExportedZip": true,
+  "zipSha256": "3e41fce68d0da0b726d3f7eccfc00988be3929f6219b8b60f452faa6f74130d0",
+  "activeTabGrant": "Native Firefox permission grant simulating a toolbar activation in the fresh test profile",
+  "savedRealFirefoxTab": true,
+  "storageSurvivedPopupReload": true,
+  "reopenedSavedTab": true,
+  "scope": "Authored Tab Pocket fixture in a temporary Firefox profile; not a universal compatibility proof or participant video.",
+  "migration": {
+    "mode": "otari",
+    "status": "candidate",
+    "spentUsd": 0.010456,
+    "costComplete": true,
+    "requests": [
+      {
+        "label": "Gateway tool discovery",
+        "requestId": null,
+        "model": null,
+        "status": "complete"
+      },
+      {
+        "label": "Compatibility analyst",
+        "requestId": "2a0e3aa0-c136-4394-8cb0-02435cdfdcd3",
+        "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "status": "complete"
+      },
+      {
+        "label": "Migration engineer",
+        "requestId": "6a454395-342f-42a2-8883-77561629f946",
+        "model": "qwen.qwen3-coder-30b-a3b-v1:0",
+        "status": "complete"
+      },
+      {
+        "label": "Sandbox manifest validation",
+        "requestId": "510b47e1-3d3a-442a-bf90-b7917fb86bc5",
+        "model": null,
+        "status": "complete"
+      }
+    ]
+  }
+}

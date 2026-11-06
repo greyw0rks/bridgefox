@@ -1,0 +1,374 @@
+{
+  "checkedAt": "2026-11-06T22:35:11.456Z",
+  "baseUrl": "https://eu.api.otari.ai/api/v1",
+  "models": [
+    {
+      "modelId": "alibaba/qwen3-235b-a22b-instruct-2507",
+      "weightRepo": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "license": "apache-2.0",
+      "revision": "ac9c66cc9b46af7306746a9250f23d47083d689e",
+      "reference": "https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "licenseReference": "https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507/blob/ac9c66cc9b46af7306746a9250f23d47083d689e/LICENSE",
+      "gated": false,
+      "catalogue": {
+        "id": "alibaba/qwen3-235b-a22b-instruct-2507",
+        "object": "model",
+        "created": 1792138244,
+        "owned_by": "alibaba",
+        "pricing": {
+          "input_price_per_million": 0.09,
+          "output_price_per_million": 0.55,
+          "pricing_tiers": [],
+          "unit": "token"
+        },
+        "pricing_source": "configured",
+        "context_window": 262144,
+        "max_output_tokens": 16384,
+        "name": "Qwen3 235B-A22B Instruct 2507",
+        "supported_parameters": [
+          "tools",
+          "tool_choice",
+          "response_format"
+        ],
+        "architecture": {
+          "input_modalities": [
+            "text"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        },
+        "type": "chat",
+        "deployment_managed": false
+      }
+    },
+    {
+      "modelId": "alibaba/qwen3-coder-30b-a3b-instruct",
+      "weightRepo": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "license": "apache-2.0",
+      "revision": "b2cff646eb4bb1d68355c01b18ae02e7cf42d120",
+      "reference": "https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "licenseReference": "https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct/blob/b2cff646eb4bb1d68355c01b18ae02e7cf42d120/LICENSE",
+      "gated": false,
+      "catalogue": {
+        "id": "alibaba/qwen3-coder-30b-a3b-instruct",
+        "object": "model",
+        "created": 1791475503,
+        "owned_by": "alibaba",
+        "pricing": {
+          "input_price_per_million": 0.15,
+          "output_price_per_million": 0.6,
+          "pricing_tiers": [],
+          "unit": "token"
+        },
+        "pricing_source": "configured",
+        "context_window": 262144,
+        "max_output_tokens": 131072,
+        "name": "Qwen3-Coder 30B-A3B Instruct",
+        "supported_parameters": [
+          "tools",
+          "tool_choice",
+          "response_format"
+        ],
+        "architecture": {
+          "input_modalities": [
+            "text"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        },
+        "type": "chat",
+        "deployment_managed": false
+      }
+    }
+  ],
+  "tools": [
+    {
+      "id": "otari_web_fetch",
+      "available": false,
+      "reason": "workspace_disabled"
+    },
+    {
+      "id": "otari_web_search",
+      "available": false,
+      "reason": "workspace_disabled"
+    },
+    {
+      "id": "otari_code_execution",
+      "available": true,
+      "reason": null
+    }
+  ],
+  "firstFundedRun": {
+    "checkedAt": "2026-11-06T22:31:34.958Z",
+    "directory": "artifacts/otari/2026-11-06T22-31-14-565Z",
+    "mode": "otari",
+    "status": "review",
+    "spentUsd": 0.003171,
+    "costComplete": true,
+    "budgetUsd": 0.5,
+    "original": "Authored MIT Tab Pocket fixture",
+    "patches": [
+      {
+        "path": "manifest.json",
+        "origin": "rules",
+        "reason": "Use Firefox MV3 background scripts while keeping the original worker source and module type. Assign a stable local Firefox add-on ID for temporary testing. This does not register or sign the add-on."
+      }
+    ],
+    "activities": [
+      {
+        "id": "79cb58d1-0a1d-4d4c-819b-6d551fb6d19c",
+        "label": "Compatibility scan",
+        "detail": "6 files analyzed; 1 findings.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:31:14.998Z"
+      },
+      {
+        "id": "e778acc3-ccfc-49f0-b803-be8b7037f603",
+        "label": "Deterministic migration",
+        "detail": "1 file patches proposed; all original permissions preserved.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:31:15.017Z"
+      },
+      {
+        "id": "062a270d-764e-4ace-9c25-3cf914432e86",
+        "label": "Gateway tool discovery",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-06T22:31:15.564Z",
+        "fallback": false,
+        "data": {},
+        "detail": "Otari responded in 0.5s."
+      },
+      {
+        "id": "d0d85fa5-413a-484b-890a-f28f100e4ed4",
+        "label": "Firefox documentation fetch",
+        "detail": "Otari web fetch is unavailable on this key. Static MDN references remain in the report.",
+        "status": "skipped",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:31:15.564Z"
+      },
+      {
+        "id": "5356fefc-517c-4536-9aa9-8f4c119037d1",
+        "label": "Compatibility analyst",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-06T22:31:34.801Z",
+        "requestId": "f5d8895d-8f76-45c8-bb02-eb72057368af",
+        "costUsd": 0.003171,
+        "model": "Qwen/Qwen3.5-35B-A3B",
+        "fallback": false,
+        "attempts": 1,
+        "data": {
+          "provider": "deepinfra"
+        },
+        "detail": "Otari responded in 19.2s."
+      },
+      {
+        "id": "ad6d7d46-adbc-4d17-92c8-47c1fafb414a",
+        "label": "AI workflow stopped",
+        "detail": "Otari model returned no text response",
+        "status": "failed",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:31:34.802Z"
+      },
+      {
+        "id": "f988d4c5-40bb-4936-9f66-4b4d7870c5cc",
+        "label": "Static validation",
+        "detail": "4 checks passed. Firefox runtime testing is still required.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:31:34.807Z"
+      }
+    ],
+    "validations": [
+      {
+        "name": "Manifest & referenced files",
+        "status": "passed",
+        "detail": "Required fields, manifest version, and declared background, popup, icons and content-script resources checked."
+      },
+      {
+        "name": "JavaScript syntax",
+        "status": "passed",
+        "detail": "JavaScript parsed as source; no uploaded code was run."
+      },
+      {
+        "name": "Permission preservation",
+        "status": "passed",
+        "detail": "Required and optional permissions and host access are unchanged."
+      },
+      {
+        "name": "Compatibility rules",
+        "status": "passed",
+        "detail": "0 blockers; 0 findings need review. API detection is best effort, not a full semantic proof."
+      },
+      {
+        "name": "Firefox runtime",
+        "status": "review",
+        "detail": "Load temporarily in desktop Firefox using about:debugging and test every extension feature. Static checks cannot certify runtime compatibility."
+      }
+    ],
+    "distinctResolvedModels": false,
+    "export": {
+      "bytes": 2540,
+      "sha256": "8bee9f882af53b7d432e593a72a30baf1f9a8da29df526109b8d142c3186888c"
+    },
+    "scope": "One real migration through the local Next.js API; runtime compatibility needs a separate Firefox check.",
+    "usageLookup": {
+      "request_id": "f5d8895d-8f76-45c8-bb02-eb72057368af",
+      "status": "success",
+      "cost_usd": "0.003171",
+      "prompt_tokens": 1218,
+      "completion_tokens": 3000,
+      "total_tokens": 4218,
+      "row_count": 1
+    },
+    "diagnosis": "No answer text was returned; usage lookup confirms the 3000-token output cap was reached. The raw response was not retained, so reasoning-only output is an inference."
+  },
+  "secondFundedRun": {
+    "checkedAt": "2026-11-06T22:36:52.010Z",
+    "directory": "artifacts/otari/2026-11-06T22-36-37-624Z",
+    "mode": "otari",
+    "status": "review",
+    "spentUsd": 0.000192,
+    "costComplete": false,
+    "budgetUsd": 0.5,
+    "original": "Authored MIT Tab Pocket fixture",
+    "patches": [
+      {
+        "path": "manifest.json",
+        "origin": "rules",
+        "reason": "Use Firefox MV3 background scripts while keeping the original worker source and module type. Assign a stable local Firefox add-on ID for temporary testing. This does not register or sign the add-on."
+      }
+    ],
+    "activities": [
+      {
+        "id": "817b2f8a-c72a-40fb-bea9-346779bb0a36",
+        "label": "Compatibility scan",
+        "detail": "6 files analyzed; 1 findings.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:36:37.878Z"
+      },
+      {
+        "id": "d1f8e7c1-c6e7-4d2c-960a-24e30f539b93",
+        "label": "Deterministic migration",
+        "detail": "1 file patches proposed; all original permissions preserved.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:36:37.892Z"
+      },
+      {
+        "id": "ea7e6b4e-1635-4505-b723-180d704ec90b",
+        "label": "Gateway tool discovery",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-06T22:36:39.598Z",
+        "data": {},
+        "detail": "Otari responded in 1.7s."
+      },
+      {
+        "id": "7950ac92-2a07-49f7-8533-356d727fe4c2",
+        "label": "Firefox documentation fetch",
+        "detail": "Otari web fetch is unavailable on this key. Static MDN references remain in the report.",
+        "status": "skipped",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:36:39.598Z"
+      },
+      {
+        "id": "f6b46b56-d633-4874-8863-dd1c96040909",
+        "label": "Compatibility analyst",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-06T22:36:51.055Z",
+        "requestId": "7608fa72-00c1-4485-b702-98b9e339c097",
+        "costUsd": 0.000192,
+        "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "fallback": false,
+        "attempts": 1,
+        "data": {
+          "provider": "deepinfra",
+          "finishReason": "stop",
+          "promptTokens": 1216,
+          "completionTokens": 151
+        },
+        "detail": "Otari responded in 11.5s."
+      },
+      {
+        "id": "11419654-f76c-4be7-bd51-0b170354969f",
+        "label": "Migration engineer",
+        "status": "failed",
+        "origin": "otari",
+        "timestamp": "2026-11-06T22:36:51.907Z",
+        "requestId": "c1ad6e66-d56b-412e-abb6-c59365cdfdf5",
+        "data": {},
+        "detail": "Otari returned HTTP 400 (unsupported_parameter). Check the account's model, tool and guardrail settings."
+      },
+      {
+        "id": "5cfb0f6a-792d-4023-8948-5d72696ace54",
+        "label": "AI workflow stopped",
+        "detail": "Otari returned HTTP 400 (unsupported_parameter). Check the account's model, tool and guardrail settings.",
+        "status": "failed",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:36:51.909Z"
+      },
+      {
+        "id": "8b063dc9-b2d5-4074-8547-a6313befeff2",
+        "label": "Static validation",
+        "detail": "4 checks passed. Firefox runtime testing is still required.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-06T22:36:51.924Z"
+      }
+    ],
+    "validations": [
+      {
+        "name": "Manifest & referenced files",
+        "status": "passed",
+        "detail": "Required fields, manifest version, and declared background, popup, icons and content-script resources checked."
+      },
+      {
+        "name": "JavaScript syntax",
+        "status": "passed",
+        "detail": "JavaScript parsed as source; no uploaded code was run."
+      },
+      {
+        "name": "Permission preservation",
+        "status": "passed",
+        "detail": "Required and optional permissions and host access are unchanged."
+      },
+      {
+        "name": "Compatibility rules",
+        "status": "passed",
+        "detail": "0 blockers; 0 findings need review. API detection is best effort, not a full semantic proof."
+      },
+      {
+        "name": "Firefox runtime",
+        "status": "review",
+        "detail": "Load temporarily in desktop Firefox using about:debugging and test every extension feature. Static checks cannot certify runtime compatibility."
+      }
+    ],
+    "distinctResolvedModels": false,
+    "export": {
+      "bytes": 2540,
+      "sha256": "8382efebca9e0762b4b7054444f7ce636f11e1dee1121d268043d900cca39a9a"
+    },
+    "scope": "One real migration through the local Next.js API; runtime compatibility needs a separate Firefox check.",
+    "engineerUsageLookup": {
+      "requestId": "c1ad6e66-d56b-412e-abb6-c59365cdfdf5",
+      "httpStatus": 200,
+      "body": {
+        "request_id": "c1ad6e66-d56b-412e-abb6-c59365cdfdf5",
+        "status": "error",
+        "cost_usd": null,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "row_count": 1
+      }
+    }
+  }
+}

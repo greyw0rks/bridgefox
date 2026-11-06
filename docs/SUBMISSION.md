@@ -6,7 +6,7 @@ One-line description: A compatibility studio that analyzes Chrome extension sour
 
 Branch: `hackathon/bridgefox`.
 
-The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cutoff timezone in the official submission form. Repository visibility, registration email, live Otari evidence, participant videos, and submission confirmation remain pending.
+The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cutoff timezone in the official submission form. Live two-model and sandbox evidence is recorded. Repository visibility, registration email, participant videos, and submission confirmation remain pending.
 
 ## Before submitting
 
@@ -14,8 +14,9 @@ The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cut
 - [ ] Complete DoraHacks registration and record the registration email privately.
 - [ ] Publish the project repository and provide its public URL and branch.
 - [ ] Link the first branch commit that introduced Otari (`git log --reverse -- src/lib/otari.ts`).
-- [ ] Resolve the account’s HTTP 402 and configure a second distinct open-weight model.
-- [ ] Perform a genuine Otari migration and save the returned model, usage, fetch, sandbox, routing, and guardrail evidence for features actually demonstrated.
+- [x] Complete a funded request and configure two distinct available open-weight models, with published license references.
+- [x] Perform a genuine Otari migration and save returned models, usage, and successful sandbox evidence; verify its exact exported ZIP in Firefox.
+- [ ] Enable and demonstrate web fetch if claiming it; demonstrate routing/fallback, gateway guardrails, and key ceilings before claiming those features.
 - [x] Verify the exported Tab Pocket fixture in Firefox (automated temporary-profile check: save, persistence, reopen).
 - [ ] Demonstrate its real behavior in the participant’s Firefox screen recording.
 - [ ] List any Otari issues or PRs you actually opened; none are currently recorded.
@@ -29,7 +30,7 @@ The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cut
 
 1. Explain the real portability problem and the tool’s limited compatibility promise (20–30 seconds).
 2. Import the original Tab Pocket Chrome ZIP; show its MV3 service worker and the compatibility findings (30–40 seconds).
-3. Run a genuine Otari migration. Show distinct analyst/engineer models and documentation use; explain any actual routing/fallback/guardrail behavior (60–90 seconds).
+3. Run a genuine Otari migration or show its retained report. Show distinct analyst/engineer models and explain that web fetch is currently disabled, with bundled Mozilla references used instead. Claim routing/fallback/guardrails only if subsequently demonstrated (60–90 seconds).
 4. Inspect the manifest/source diff and permission preservation. Show the real sandbox response and known costs (30–45 seconds).
 5. Export, load the extracted `manifest.json` through Firefox `about:debugging`, save a real web-page tab, then reopen the saved page from Tab Pocket (45–60 seconds).
 6. State remaining limitations honestly (15–20 seconds).

@@ -32,7 +32,9 @@ See [docs/DESIGN.md](docs/DESIGN.md) for the visual system and interaction detai
 
 ## Otari setup
 
-See [docs/OTARI.md](docs/OTARI.md). Select two distinct open-weight models available in your account. The first connection attempt in this workspace returned HTTP 402; there is **no successful hosted migration evidence yet**. Local rules work independently. The Otari workflow has transport-mocked tests; these are not hackathon usage evidence.
+See [docs/OTARI.md](docs/OTARI.md). A genuine two-model migration of Tab Pocket completed on November 6, 2026, with Qwen3 Instruct analysis, Qwen3-Coder review, and Otari Python validation. The job cost **$0.010456**, and its exported ZIP passed Firefox save/persist/reopen checks. The models accepted the existing local manifest conversion without adding unnecessary code edits. [Gateway evidence](docs/evidence/otari-migration-2026-11-06.json) and [Firefox evidence](docs/evidence/firefox-otari-2026-11-06.json) retain request IDs and the tested ZIP hash.
+
+Web fetch is disabled for this hosted workspace. Routing fallback, gateway guardrails, and a gateway-enforced key ceiling remain unverified. Local rules work independently; transport-mocked tests are separate from the live evidence.
 
 ## Verify
 
@@ -51,6 +53,8 @@ npm run check:firefox
 `npm run demo:zip` produces the original Chrome ZIP under `public/examples`, a migrated fixture under `fixtures/tab-pocket`, and a Firefox ZIP plus report under ignored `artifacts/`.
 
 The Firefox runtime check uses Python 3’s standard library and Mozilla geckodriver. Set `BRIDGEFOX_FIREFOX_BINARY` and `BRIDGEFOX_GECKODRIVER` if they are not on your PATH. It installs the exported fixture in a temporary profile, grants Firefox’s native `activeTab` permission as a toolbar activation would, and checks saving, persistence, and reopening a real tab. It never touches your personal Firefox profile. A participant’s manual toolbar demonstration remains necessary for the hackathon video.
+
+For a deliberately paid verification, start the configured app and run `npm run check:otari -- --run`. Results are retained under `artifacts/otari/`. To test that exact output, set `BRIDGEFOX_ADDON_ZIP` to its ZIP, `BRIDGEFOX_MIGRATION_REPORT` to its `migration.json`, and optionally `BRIDGEFOX_FIREFOX_ARTIFACT` to a separate output directory before running the Firefox check. Inspect retained costs before repeating a failed live run.
 
 ## Install a candidate
 

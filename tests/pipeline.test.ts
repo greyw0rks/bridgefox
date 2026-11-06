@@ -176,12 +176,39 @@ test("Otari workflow uses two roles, fetch, sandbox and real returned usage (moc
     const result = await migrate(DEMO, "otari", () => {});
     assert.deepEqual(calls.map(c => c.path), ["/tools", "/fetch", "/chat/completions", "/chat/completions", "/code/execute"]);
     assert.deepEqual(calls.filter(c => c.path === "/chat/completions").map(c => c.body.model), ["test-open-analyst", "test-open-engineer"]);
+    assert.equal(calls[2].body.response_format.type, "json_object");
+    assert.equal(calls[3].body.response_format, undefined);
     assert.ok(calls[2].body.guardrails[0].on_unavailable === "block");
     assert.ok(calls[4].body.code.startsWith("import json"));
     assert.ok(!calls[4].body.code.includes("chrome.tabs.query"));
     assert.equal(result.costComplete, true); assert.ok(Math.abs(result.spentUsd - .009) < .000001);
     assert.equal(result.activities.filter(a => a.status === "running").length, 0);
     assert.ok(result.activities.some(a => a.fallback));
+  } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
+});
+test("billed unusable analyst output fails the role, retains cost once, and never calls the engineer", async () => {
+  const env = { ...process.env }; const previousFetch = globalThis.fetch;
+  Object.assign(process.env, { OTARI_BASE_URL: "https://test.otari.invalid/api/v1", OTARI_API_KEY: "test-key", OTARI_ANALYST_MODEL: "a", OTARI_ENGINEER_MODEL: "b" });
+  try {
+    for (const content of [null, "not valid JSON"]) {
+      let completions = 0;
+      globalThis.fetch = async url => {
+        if (String(url).endsWith("/tools")) return Response.json({ data: [] });
+        completions++;
+        return Response.json({ choices: [{ message: { content }, finish_reason: "length" }], usage: { cost_usd: ".004", completion_tokens: 3000 } }, { headers: { "Otari-Request-ID": "test-unusable", "Otari-Model": "a" } });
+      };
+      const result = await migrate(DEMO, "otari", () => {});
+      assert.equal(completions, 1);
+      assert.equal(result.status, "review");
+      assert.equal(result.spentUsd, .004);
+      assert.equal(result.costComplete, true);
+      const role = result.activities.find(a => a.label === "Compatibility analyst")!;
+      assert.equal(role.status, "failed");
+      assert.equal(role.requestId, "test-unusable");
+      assert.equal((role.data as { finishReason: string }).finishReason, "length");
+      if (content === null) assert.match(role.detail, /output token limit/);
+      assert.equal(result.activities.some(a => a.label === "Migration engineer"), false);
+    }
   } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
 });
 test("unknown gateway cost stops further paid calls", async () => {

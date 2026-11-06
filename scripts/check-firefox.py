@@ -1,5 +1,6 @@
 """Test the authored Tab Pocket fixture in a fresh Firefox WebDriver profile."""
 import base64
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -9,10 +10,16 @@ import subprocess
 import time
 import urllib.error
 import urllib.request
+import zipfile
 
 root = Path(__file__).resolve().parent.parent
-artifact = root / "artifacts" / "firefox"
+artifact = Path(os.environ.get("BRIDGEFOX_FIREFOX_ARTIFACT") or root / "artifacts" / "firefox").resolve()
 artifact.mkdir(parents=True, exist_ok=True)
+addon_zip = Path(os.environ.get("BRIDGEFOX_ADDON_ZIP") or root / "artifacts/tab-pocket-firefox.zip").resolve()
+with zipfile.ZipFile(addon_zip) as archive:
+    manifest = json.loads(archive.read("manifest.json"))
+migration_report = os.environ.get("BRIDGEFOX_MIGRATION_REPORT")
+migration = json.loads(Path(migration_report).read_text()) if migration_report else None
 driver = os.environ.get("BRIDGEFOX_GECKODRIVER") or shutil.which("geckodriver")
 binary = os.environ.get("BRIDGEFOX_FIREFOX_BINARY") or shutil.which("firefox")
 if not driver or not binary:
@@ -52,13 +59,12 @@ try:
             if time.monotonic() > deadline or process.poll() is not None:
                 raise RuntimeError("Firefox WebDriver did not start") from None
             time.sleep(.1)
-    manifest = json.loads((root / "fixtures/tab-pocket/manifest.json").read_text())
     addon_id = manifest["browser_specific_settings"]["gecko"]["id"]
     uuid = "68526cf0-6fde-441f-b9b4-caa1857d9051"
     created = request("/session", {"capabilities": {"alwaysMatch": {"browserName": "firefox", "moz:firefoxOptions": {"binary": binary, "args": ["-headless"], "prefs": {"extensions.webextensions.uuids": json.dumps({addon_id: uuid})}}}}})
     session_id = created["sessionId"]
     session("/timeouts", {"script": 10000, "pageLoad": 20000, "implicit": 0})
-    installed = session("/moz/addon/install", {"path": str(root / "artifacts/tab-pocket-firefox.zip"), "temporary": True})
+    installed = session("/moz/addon/install", {"path": str(addon_zip), "temporary": True})
     assert installed == addon_id
     print("PASS exported ZIP installed in Firefox", flush=True)
     target_url = (os.environ.get("BRIDGEFOX_TEST_URL") or "http://localhost:3035") + "/examples/tab-page.html"
@@ -108,7 +114,9 @@ try:
         if time.monotonic() > deadline:
             raise AssertionError("The reopened tab did not navigate to the saved URL")
         time.sleep(.1)
-    evidence = {"testedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "firefox": created["capabilities"]["browserVersion"], "driver": "Mozilla geckodriver", "addonId": addon_id, "installedExportedZip": True, "activeTabGrant": "Native Firefox permission grant simulating a toolbar activation in the fresh test profile", "savedRealFirefoxTab": True, "storageSurvivedPopupReload": True, "reopenedSavedTab": True, "liveOtariCalls": 0, "scope": "Authored Tab Pocket fixture in a temporary Firefox profile; not a universal compatibility proof or participant video."}
+    evidence = {"testedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "firefox": created["capabilities"]["browserVersion"], "driver": "Mozilla geckodriver", "addonId": addon_id, "installedExportedZip": True, "zipSha256": hashlib.sha256(addon_zip.read_bytes()).hexdigest(), "activeTabGrant": "Native Firefox permission grant simulating a toolbar activation in the fresh test profile", "savedRealFirefoxTab": True, "storageSurvivedPopupReload": True, "reopenedSavedTab": True, "scope": "Authored Tab Pocket fixture in a temporary Firefox profile; not a universal compatibility proof or participant video."}
+    if migration:
+        evidence["migration"] = {"mode": migration["mode"], "status": migration["status"], "spentUsd": migration["spentUsd"], "costComplete": migration["costComplete"], "requests": [{"label": a["label"], "requestId": a.get("requestId"), "model": a.get("model"), "status": a["status"]} for a in migration["activities"] if a["origin"] == "otari"]}
     (artifact / "checks.json").write_text(json.dumps(evidence, indent=2) + "\n")
     print(json.dumps(evidence, indent=2))
 finally:

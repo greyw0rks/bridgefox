@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "check:ui": "tsx scripts/check-ui.ts",
+    "check:otari": "node scripts/check-otari.mjs",
     "demo:zip": "tsx scripts/demo-zip.ts",
     "lint:addon": "web-ext lint --source-dir fixtures/tab-pocket --warnings-as-errors",
     "sync:compat": "node scripts/sync-compat.mjs",
