@@ -1,20 +1,26 @@
-# Verification — November 6, 2026
+# Verification — November 7, 2026
 
-The local migration workflow and one genuine hosted Otari migration are verified. The hosted models reviewed Tab Pocket's local manifest conversion and proposed no additional code edits. The exact exported candidate passed Firefox runtime checks.
+The local migration workflow and one genuine hosted Otari migration are verified. The November 6 hosted models reviewed Tab Pocket's local manifest conversion and proposed no additional code edits. Its exact exported candidate passed Firefox runtime checks. November 7 checks extend import limits and verify large source/asset preservation without making additional paid calls.
 
 | Check | Result |
 | --- | --- |
-| Pipeline tests | 25 passing: source migration/export, API checks, malformed inputs, archive safety, manifest/permission invariants, mocked GitHub import, mocked Otari roles/tools/costs/failures, delayed usage settlement, and unusable billed model output |
+| Pipeline tests | 37 passing: project-reference migration/export and expiry, fragmented migration-stream parsing, source migration/export, browser-template selection, virtual-manifest exclusion, assets above the old 32 MiB limit, large ZIP and JSON transport, large bundles/assets, entry/byte-limit rejection, API checks, archive safety, manifest/permission invariants, Host/origin authorization, large mocked GitHub import, mocked Otari roles/tools/costs/failures, bounded AI coverage, omitted-source patch rejection, and delayed usage settlement |
 | TypeScript | Passed standalone check and production build type checking |
 | Production build | Passed with Next.js 16.4.5 |
 | Add-on lint | Tab Pocket: zero errors, notices, or warnings with web-ext 10.8.0 |
-| Browser UI | Seven check groups passed against the production app; desktop/tablet/mobile widths 1440, 1024, 768, 390, and 360 checked as applicable |
+| Browser UI | Ten check groups passed against the production app; desktop/tablet/mobile widths 1440, 1024, 768, 390, and 360 checked as applicable |
+| Large browser import | 22,108,183-byte ZIP, 608 files, 3,150,267-byte JS bundle and two 9 MiB assets passed actual browser upload, migration, full-source download and exact export checks. The migration request is now 67 bytes using a project reference; the prior complete-project request was 28,368,309 bytes. Desktop/mobile previews stay within the viewport; no browser errors. |
+| Rabby source repository | 58,422,949-byte source ZIP, 3,225 files, 81,387,585 expanded bytes. All files matched SHA-256 after source export, including the 33,847,339-byte audit PDF. Chrome MV3 default and Firefox MV2 selection checked; virtual analysis manifest excluded. File browser paginated; desktop/mobile without overflow; no browser errors. Analysis/migration/export requests measured 108/67/83 bytes using project references. No repository scripts run or Firefox runtime tested. |
 | Firefox runtime | Exported ZIP installed in Firefox 141.0; a real web tab saved, persisted across popup reload, and reopened |
 | Hosted Otari | Two distinct Qwen models and the Python sandbox completed; $0.010456 known job cost; candidate exported through actual Next.js endpoints |
+| Current gateway connectivity | November 7 read-only discovery returned HTTP 200 with the configured key. Sandbox available; web fetch/search remain `workspace_disabled`. No paid operation sent. |
+| Interrupted AI request | Browser request deliberately aborted before reaching the app: actionable connection/usage message, source retained, busy state cleared, no automatic retry. No paid job or billing record was tested. |
 | Hosted candidate lint | Exact exported ZIP: zero errors, notices, or warnings with web-ext 10.8.0 |
 | Hosted candidate Firefox | Exact ZIP installed in Firefox 141.0; real tab saved, persisted across popup reload, and reopened |
 
 The pipeline/GitHub/Otari network checks use mock transports and make no paid requests. The UI check exercises actual local HTTP endpoints and downloads the generated ZIP.
+
+November 7 evidence: [large import](evidence/large-import-2026-11-07.json), [Rabby source import](evidence/rabby-source-import-2026-11-07.json), [read-only gateway connection](evidence/gateway-connection-2026-11-07.json), and [interrupted AI request](evidence/network-error-2026-11-07.json). Reproduce with `npm run check:large-import`, `npm run check:source-import -- /path/to/Rabby-develop.zip`, `npm run check:gateway-connection`, and `npm run check:network-error`. The last check deliberately aborts the browser request; it does not retry a paid operation.
 
 The Firefox runtime test uses Mozilla geckodriver in a disposable profile. It invokes Firefox’s native `activeTab` grant to simulate toolbar activation, then operates the actual extension popup and storage APIs. It does not add manifest permissions or use the participant’s own browser profile. This proves the included fixture’s tested behavior, not arbitrary extension portability. The participant should still click the toolbar action and demonstrate the extension in their own recording.
 

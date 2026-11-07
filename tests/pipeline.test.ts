@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { randomBytes, createHash, randomUUID } from "node:crypto";
 import JSZip from "jszip";
 import { importZip, safePath, validateProject } from "../src/lib/archive";
 import { analyze, apiSupport, readManifest } from "../src/lib/analyzer";
@@ -9,12 +10,136 @@ import { exportZip } from "../src/lib/export";
 import { applyPatches, deterministicPatches, parseAiJson } from "../src/lib/patches";
 import { authorize, boundedBody } from "../src/lib/http";
 import { POST as githubImport } from "../src/app/api/github/route";
+import { POST as analyzeProject } from "../src/app/api/analyze/route";
 import { gatewayCall } from "../src/lib/otari";
 import type { Patch, Project } from "../src/lib/types";
+import { LIMITS } from "../src/lib/limits";
+import { selectAiContext, AI_SOURCE_CHAR_LIMIT } from "../src/lib/ai-context";
+import { lineReader } from "../src/lib/ndjson";
+import { editorProject, recalledProject, rememberProject } from "../src/lib/project-store";
+import { POST as migrateRequest } from "../src/app/api/migrate/route";
+import { POST as exportRequest } from "../src/app/api/export/route";
 
 const clone = () => structuredClone(DEMO);
+test("project references keep complete binary assets on the server through migration and export", async () => {
+  const project = clone();
+  const asset = randomBytes(512 * 1024);
+  project.files.push({ path: "audit.pdf", content: asset.toString("base64"), encoding: "base64" });
+  const id = rememberProject(validateProject(project));
+  assert.equal(editorProject(project).files.at(-1)?.content, "");
+  assert.equal(recalledProject(id).files.at(-1)?.content, asset.toString("base64"));
+  const request = new Request("http://localhost/api/migrate", { method: "POST", body: JSON.stringify({ projectId: id, mode: "local" }) });
+  const response = await migrateRequest(request);
+  assert.equal(response.status, 200);
+  const events = (await response.text()).trim().split("\n").map(line => JSON.parse(line));
+  const result = events.find(event => event.type === "result").result;
+  assert.equal(result.project.files.at(-1).content, "");
+  const exported = await exportRequest(new Request("http://localhost/api/export", { method: "POST", body: JSON.stringify({ projectId: id, patches: result.patches }) }));
+  assert.equal(exported.status, 200);
+  const zip = await JSZip.loadAsync(await exported.arrayBuffer());
+  assert.deepEqual(await zip.file("audit.pdf")!.async("nodebuffer"), asset);
+  const expired = await migrateRequest(new Request("http://localhost/api/migrate", { method: "POST", body: JSON.stringify({ projectId: randomUUID(), mode: "local" }) }));
+  assert.equal(expired.status, 410);
+  assert.match((await expired.json()).error, /Upload the original ZIP again/);
+});
+test("project storage expires idle references and bounds retained projects", () => {
+  const id = rememberProject(clone());
+  const now = Date.now;
+  try {
+    Date.now = () => now() + 31 * 60 * 1000;
+    assert.throws(() => recalledProject(id), /expired/);
+  } finally { Date.now = now; }
+  const first = rememberProject(clone());
+  for (let i = 0; i < 4; i++) rememberProject(clone());
+  assert.throws(() => recalledProject(first), /expired/);
+});
+test("migration stream preserves records split across network chunks, including a large final result", () => {
+  const expected = [{ type: "activity", text: "one" }, { type: "result", source: "large source ".repeat(200000) }];
+  const wire = "\n" + expected.map(value => JSON.stringify(value)).join("\n");
+  const actual: unknown[] = [];
+  const reader = lineReader(line => actual.push(JSON.parse(line)), wire.length);
+  for (let start = 0; start < wire.length; start += 137) reader.push(wire.slice(start, start + 137));
+  reader.finish();
+  assert.deepEqual(actual, expected);
+  const bounded = lineReader(() => {}, 4);
+  bounded.push("123");
+  assert.throws(() => bounded.push("45"), /response exceeds/);
+});
 function changeManifest(project: Project, change: (manifest: Record<string, any>) => void) { const m = readManifest(project); change(m); project.files[0].content = JSON.stringify(m); return project; }
 function patch(project: Project, path: string, after: string): Patch { return { path, before: project.files.find(f => f.path === path)!.content, after, reason: "Test migration proposal", origin: "otari" }; }
+
+async function sourceRepository() {
+  const zip = new JSZip();
+  zip.file("repo/package.json", JSON.stringify({ name: "source-wallet", scripts: { "build:firefox": "webpack" } }));
+  zip.file("repo/src/main.ts", "const balance: number = 1;");
+  for (const browser of ["chrome-mv2", "chrome-mv3", "firefox-mv2"]) {
+    const manifest = readManifest(DEMO);
+    manifest.name = "__MSG_name__";
+    manifest.manifest_version = browser.endsWith("mv3") ? 3 : 2;
+    zip.file(`repo/src/manifest/${browser}/manifest.json`, JSON.stringify(manifest));
+  }
+  // Rabby's audit PDF exceeds the former 32 MiB file limit.
+  zip.file("repo/audits/report.pdf", Buffer.alloc(33 * 1024 * 1024, 37));
+  zip.file("repo/LICENSE", "Original license");
+  const bytes = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+  return { project: await importZip(bytes, "source-wallet.zip"), zip };
+}
+
+test("source repositories preserve browser templates and assets, and export source without an analysis manifest", async () => {
+  const { project, zip } = await sourceRepository();
+  assert.equal(project.source?.manifestPath, "src/manifest/chrome-mv3/manifest.json");
+  assert.equal(project.source?.manifestCandidates.length, 3);
+  assert.equal(analyze(project).name, "source-wallet");
+  assert.ok(analyze(project).findings.some(f => f.rule === "source-build" && f.severity === "blocked"));
+  assert.deepEqual(deterministicPatches(project), []);
+  await assert.rejects(exportZip(project, []), /Build this source repository/);
+  const output = await exportZip(project, [], "source");
+  assert.match(output.name, /-reviewed-source.zip$/);
+  const extracted = await JSZip.loadAsync(output.bytes);
+  assert.equal(extracted.file("manifest.json"), null);
+  for (const [path, file] of Object.entries(zip.files)) if (!file.dir) {
+    assert.deepEqual(await extracted.file(path.slice(5))!.async("nodebuffer"), await file.async("nodebuffer"));
+  }
+  assert.equal((await importZip(output.bytes, output.name)).source?.manifestCandidates.length, 3);
+});
+
+test("manifest selection reanalyzes the source, and patches use its real path with permission guards", async () => {
+  const { project } = await sourceRepository();
+  const path = "src/manifest/firefox-mv2/manifest.json";
+  project.source!.manifestPath = path;
+  project.files[0].content = project.files.find(f => f.path === path)!.content;
+  const response = await analyzeProject(new Request("http://localhost/api/analyze", { method: "POST", body: JSON.stringify({ project }) }));
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.report.manifestVersion, 2);
+  assert.equal(data.project.files.length, project.files.length);
+  const selectedResponse = await analyzeProject(new Request("http://localhost/api/analyze", { method: "POST", body: JSON.stringify({ projectId: data.projectId, manifestPath: "src/manifest/chrome-mv3/manifest.json" }) }));
+  assert.equal(selectedResponse.status, 200);
+  assert.equal((await selectedResponse.json()).report.manifestVersion, 3);
+  assert.equal(recalledProject(data.projectId).files.find(f => f.path === "audits/report.pdf")!.content, project.files.find(f => f.path === "audits/report.pdf")!.content);
+  assert.throws(() => applyPatches(project, [patch(project, "manifest.json", project.files[0].content)]), /analysis copy/);
+  const unselected = "src/manifest/chrome-mv3/manifest.json";
+  assert.throws(() => applyPatches(project, [patch(project, unselected, "{}")]), /Select this manifest/);
+  const manifest = readManifest(project);
+  manifest.browser_specific_settings = { ...manifest.browser_specific_settings, gecko: { ...manifest.browser_specific_settings?.gecko, id: "source@example.org" } };
+  const output = applyPatches(project, [patch(project, path, JSON.stringify(manifest))]);
+  assert.equal(output.files[0].content, output.files.find(f => f.path === path)!.content);
+  assert.deepEqual(readManifest(output).permissions, readManifest(project).permissions);
+  manifest.permissions = [];
+  assert.throws(() => applyPatches(project, [patch(project, path, JSON.stringify(manifest))]), /manifest.permissions/);
+  project.files[0].content = "{}";
+  assert.throws(() => validateProject(project), /manifest selection is invalid/);
+});
+
+test("the virtual source manifest does not consume an archive file slot", async () => {
+  const { project } = await sourceRepository();
+  project.files = project.files.filter(f => f.path !== "audits/report.pdf");
+  while (project.files.length < LIMITS.files + 1) project.files.push({ path: `asset-${project.files.length}.txt`, content: "x", encoding: "utf8" });
+  assert.equal(validateProject(project).files.length, LIMITS.files + 1);
+  const ordinary = clone();
+  ordinary.files = [ordinary.files[0], ...project.files.filter(f => f.path !== "manifest.json")];
+  assert.throws(() => validateProject(ordinary), /too many files/);
+});
 
 test("Chrome fixture migrates, exports, and reimports with assets and permissions intact", async () => {
   const result = await migrate(DEMO, "local", () => {});
@@ -115,9 +240,55 @@ test("ZIP traversal, symlinks, duplicate paths, and oversized files are rejected
     if (kind === "traversal") zip.file("../escape.js", "attack");
     if (kind === "symlink") zip.file("linked.js", "../outside", { unixPermissions: 0o120777 });
     if (kind === "duplicate") zip.file("MANIFEST.JSON", DEMO.files[0].content);
-    if (kind === "oversized") zip.file("giant.js", "x".repeat(2 * 1024 * 1024 + 1));
-    await assert.rejects(importZip(await zip.generateAsync({ type: "nodebuffer", platform: "UNIX", compression: "DEFLATE" }), "unsafe.zip"));
+    if (kind === "oversized") zip.file("giant.js", "x".repeat(LIMITS.file + 1));
+    await assert.rejects(importZip(await zip.generateAsync({ type: "nodebuffer", platform: "UNIX", compression: "DEFLATE" }), "unsafe.zip"), kind === "oversized" ? /giant.js.*64.0 MB.*per-file/ : /./);
   }
+});
+test("large ZIPs and bundles survive import, migration, JSON transport, and export intact", async () => {
+  const zip = new JSZip();
+  for (const file of DEMO.files) zip.file(file.path, file.content);
+  const bundle = `/*${"bundle ".repeat(450000)}*/\n${DEMO.files[1].content}`;
+  zip.file("background.js", bundle);
+  const assets = [randomBytes(9 * 1024 * 1024), randomBytes(9 * 1024 * 1024)];
+  for (const [i, asset] of assets.entries()) zip.file(`asset-${i}.bin`, asset);
+  for (let i = 0; i < 600; i++) zip.file(`assets/item-${i}.txt`, `Preserved asset ${i}`);
+  const bytes = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+  assert.ok(bytes.length > 8 * 1024 * 1024);
+  const imported = await importZip(bytes, "large-extension.zip");
+  assert.ok(imported.files.length > 400);
+  const transported = JSON.stringify({ project: imported, mode: "local" });
+  assert.ok(Buffer.byteLength(transported) > 24 * 1024 * 1024);
+  const request = new Request("http://localhost/api/migrate", { method: "POST", body: transported });
+  const decoded = JSON.parse(new TextDecoder().decode(await boundedBody(request))).project;
+  const result = await migrate(validateProject(decoded), "local", () => {});
+  assert.equal(result.status, "candidate");
+  const exported = await exportZip(imported, result.patches);
+  const output = await importZip(exported.bytes, exported.name);
+  assert.equal(output.files.find(f => f.path === "background.js")?.content, bundle);
+  assert.deepEqual(readManifest(output).permissions, readManifest(DEMO).permissions);
+  for (const [i, asset] of assets.entries()) {
+    const preserved = Buffer.from(output.files.find(f => f.path === `asset-${i}.bin`)!.content, "base64");
+    assert.equal(createHash("sha256").update(preserved).digest("hex"), createHash("sha256").update(asset).digest("hex"));
+  }
+  assert.equal(output.files.find(f => f.path === "assets/item-599.txt")?.content, "Preserved asset 599");
+});
+test("ZIPs above the archive byte or entry count limits are still rejected", async () => {
+  await assert.rejects(importZip(Buffer.alloc(LIMITS.upload + 1), "oversized.zip"), /100 MB/);
+  const zip = new JSZip(); zip.file("manifest.json", DEMO.files[0].content);
+  for (let i = 0; i < LIMITS.files; i++) zip.file(`file-${i}.txt`, "x");
+  await assert.rejects(importZip(await zip.generateAsync({ type: "nodebuffer" }), "many-files.zip"), /too many entries/);
+});
+test("AI context includes whole prioritized source and identifies oversized omissions", () => {
+  const project = clone();
+  project.files.push({ path: "large.js", encoding: "utf8", content: `/*${"x".repeat(AI_SOURCE_CHAR_LIMIT)}*/` });
+  project.files.push({ path: "small.js", encoding: "utf8", content: "chrome.tabs.query({}, () => {});" });
+  const context = selectAiContext(project, analyze(project));
+  assert.ok(context.characters <= AI_SOURCE_CHAR_LIMIT);
+  assert.equal(context.files[0].path, "manifest.json");
+  assert.ok(context.files.some(f => f.path === "background.js"));
+  assert.ok(context.files.some(f => f.path === "small.js"));
+  assert.deepEqual(context.omittedPaths, ["large.js"]);
+  assert.equal(context.files.find(f => f.path === "small.js")?.content, project.files.at(-1)!.content);
 });
 test("unsafe paths, duplicate JSON payloads, and invalid binary data are rejected", () => {
   for (const path of ["../x", "/x", "a\\b", "a/./b", "a:b", "a//b", "a\u0000b"]) assert.equal(safePath(path), false);
@@ -141,11 +312,21 @@ test("workspace access requires matching secret and same origin", () => {
     assert.throws(() => authorize(new Request("http://localhost/api/import")), /access password/);
     assert.throws(() => authorize(new Request("http://localhost/api/import", { headers: { "x-bridgefox-access": "test-workspace-secret", origin: "https://other.example" } })), /Cross-origin/);
     authorize(new Request("http://localhost/api/import", { headers: { "x-bridgefox-access": "test-workspace-secret", origin: "http://localhost" } }));
+    authorize(new Request("http://localhost:3035/api/import", { headers: { "x-bridgefox-access": "test-workspace-secret", host: "127.0.0.1:3035", origin: "http://127.0.0.1:3035" } }));
+    assert.throws(() => authorize(new Request("http://localhost:3035/api/import", { headers: { "x-bridgefox-access": "test-workspace-secret", host: "127.0.0.1:3035", origin: "http://localhost:3035" } })), /Cross-origin/);
   } finally { if (previous === undefined) delete process.env.BRIDGEFOX_ACCESS_TOKEN; else process.env.BRIDGEFOX_ACCESS_TOKEN = previous; }
+});
+test("public HTTP Host requires workspace access even when the internal URL is localhost", () => {
+  const previous = process.env.BRIDGEFOX_ACCESS_TOKEN;
+  delete process.env.BRIDGEFOX_ACCESS_TOKEN;
+  try {
+    assert.throws(() => authorize(new Request("http://localhost/api/import", { headers: { host: "public.example" } })), /workspace publicly/);
+  } finally { if (previous !== undefined) process.env.BRIDGEFOX_ACCESS_TOKEN = previous; }
 });
 test("GitHub import uses one fixed download host and the bounded ZIP pipeline", async () => {
   const previousFetch = globalThis.fetch; const calls: string[] = [];
   const zip = new JSZip(); for (const file of DEMO.files) zip.file(`extension-main/${file.path}`, file.content);
+  zip.file("extension-main/large.bin", randomBytes(9 * 1024 * 1024));
   const bytes = await zip.generateAsync({ type: "uint8array" });
   globalThis.fetch = async url => { calls.push(String(url)); return new Response(bytes as BodyInit, { headers: { "Content-Type": "application/zip" } }); };
   try {
@@ -209,6 +390,52 @@ test("billed unusable analyst output fails the role, retains cost once, and neve
       if (content === null) assert.match(role.detail, /output token limit/);
       assert.equal(result.activities.some(a => a.label === "Migration engineer"), false);
     }
+  } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
+});
+test("large projects complete a bounded AI review and retain omitted source for manual review", async () => {
+  const env = { ...process.env }; const previousFetch = globalThis.fetch;
+  Object.assign(process.env, { OTARI_BASE_URL: "https://test.otari.invalid/api/v1", OTARI_API_KEY: "test-key", OTARI_ANALYST_MODEL: "a", OTARI_ENGINEER_MODEL: "b" });
+  const project = clone();
+  const large = { path: "large.js", encoding: "utf8" as const, content: `/*${"x".repeat(AI_SOURCE_CHAR_LIMIT)}*/` };
+  project.files.push(large);
+  let completions = 0;
+  globalThis.fetch = async (url, options) => {
+    if (String(url).endsWith("/tools")) return Response.json({ data: [] });
+    completions++;
+    const body = JSON.parse(String(options?.body));
+    const input = JSON.parse(body.messages[1].content);
+    assert.equal(input.scope.omittedSourceCount, 1);
+    assert.equal(input.files.some((f: { path: string }) => f.path === large.path), false);
+    return Response.json({ choices: [{ message: { content: '{"summary":"Supplied files reviewed","patches":[]}' } }], usage: { cost_usd: ".001" } });
+  };
+  try {
+    const result = await migrate(project, "otari", () => {});
+    assert.equal(completions, 2);
+    assert.equal(result.status, "review");
+    assert.equal(result.activities.some(a => a.status === "failed"), false);
+    assert.equal(result.validations.find(v => v.name === "AI source coverage")?.status, "review");
+    assert.equal(result.project.files.find(f => f.path === large.path)?.content, large.content);
+    const exported = await exportZip(project, result.patches);
+    assert.equal((await importZip(exported.bytes, exported.name)).files.find(f => f.path === large.path)?.content, large.content);
+  } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
+});
+test("AI cannot patch a file omitted from its bounded review", async () => {
+  const env = { ...process.env }; const previousFetch = globalThis.fetch;
+  Object.assign(process.env, { OTARI_BASE_URL: "https://test.otari.invalid/api/v1", OTARI_API_KEY: "test-key", OTARI_ANALYST_MODEL: "a", OTARI_ENGINEER_MODEL: "b" });
+  const project = clone();
+  const large = { path: "large.js", encoding: "utf8" as const, content: `/*${"x".repeat(AI_SOURCE_CHAR_LIMIT)}*/` };
+  project.files.push(large);
+  let calls = 0;
+  globalThis.fetch = async url => {
+    if (String(url).endsWith("/tools")) return Response.json({ data: [] });
+    calls++;
+    return Response.json({ choices: [{ message: { content: JSON.stringify({ summary: "Review", patches: calls === 1 ? [] : [{ path: large.path, before: large.content, after: "// removed", reason: "Guess" }] }) } }], usage: { cost_usd: ".001" } });
+  };
+  try {
+    const result = await migrate(project, "otari", () => {});
+    assert.equal(result.status, "review");
+    assert.equal(result.project.files.find(f => f.path === large.path)?.content, large.content);
+    assert.ok(result.activities.some(a => a.status === "failed" && a.detail.includes("outside its review context")));
   } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
 });
 test("unknown gateway cost stops further paid calls", async () => {

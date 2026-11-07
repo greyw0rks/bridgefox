@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-11-07T00:04:20.588Z",
+  "archive": "Rabby-develop.zip",
+  "zipBytes": 58422949,
+  "fileCount": 3225,
+  "extractedBytes": 81387585,
+  "largestFile": {
+    "path": "audits/2021/[20210623]Rabby chrome extension Penetration Testing Report.pdf",
+    "bytes": 33847339,
+    "sha256": "38114e61109ea4cfd7bbd49950b0a947048c6262b1c879a990fa898fe8ef427a"
+  },
+  "manifestCandidates": 3,
+  "defaultManifest": "src/manifest/chrome-mv3/manifest.json",
+  "selectedManifest": "src/manifest/firefox-mv2/manifest.json",
+  "browserUploadPassed": true,
+  "selectionReanalyzed": true,
+  "sourceExportPassed": true,
+  "allFilesHashMatched": true,
+  "virtualManifestExcluded": true,
+  "mobileAndDesktopWithoutOverflow": true,
+  "mode": "local",
+  "paidOtariCalls": 0,
+  "repositoryScriptsExecuted": false,
+  "runtimeTested": false,
+  "pageErrors": [],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:3035/api/status",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:3035/api/import",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:3035/api/analyze",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:3035/api/migrate",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:3035/api/export",
+      "status": 200
+    }
+  ],
+  "projectRequestBytes": {
+    "analyze": 108,
+    "migrate": 67,
+    "export": 83
+  },
+  "fileBrowserPaginated": true,
+  "scope": "Source import and preservation only; Rabby is not built, migrated or runtime-verified by this check."
+}

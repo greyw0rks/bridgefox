@@ -5,6 +5,7 @@ import { safePath, validateProject } from "./archive";
 import type { Patch, Project } from "./types";
 
 export function deterministicPatches(project: Project): Patch[] {
+  if (project.source) return [];
   const before = project.files.find(f => f.path === "manifest.json")!.content;
   const manifest = readManifest(project);
   const report = analyze(project);
@@ -36,6 +37,8 @@ export function applyPatches(project: Project, patches: Patch[]): Project {
   const files = project.files.map(f => ({ ...f }));
   const changed = new Set<string>();
   for (const patch of patches) {
+    if (project.source && patch.path === "manifest.json") throw new Error("Patch the selected source manifest path; the root manifest is an analysis copy");
+    if (project.source && project.source.manifestCandidates.includes(patch.path) && patch.path !== project.source.manifestPath) throw new Error("Select this manifest for analysis before proposing changes to it");
     if (!safePath(patch.path) || changed.has(patch.path)) throw new Error("Unsafe or duplicate patch path");
     changed.add(patch.path);
     const file = files.find(f => f.path === patch.path);
@@ -43,6 +46,7 @@ export function applyPatches(project: Project, patches: Patch[]): Project {
     if (!patch.after.trim()) throw new Error("Patches cannot empty a source file");
     file.content = patch.after;
   }
+  if (project.source) files.find(f => f.path === "manifest.json")!.content = files.find(f => f.path === project.source!.manifestPath)!.content;
   const output = validateProject({ ...project, files });
   const before = readManifest(project), after = readManifest(output);
   const mutable = new Set(["background", "browser_specific_settings"]);

@@ -2,6 +2,16 @@
 
 import { diffLines } from "diff";
 import { Highlight, type PrismTheme } from "prism-react-renderer";
+import { sourcePreview } from "@/lib/source-preview";
+
+function downloadSource(code: string, path: string) {
+  const url = URL.createObjectURL(new Blob([code], { type: "text/plain;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = path.split("/").at(-1) || "source.txt";
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 const lightTheme: PrismTheme = {
   plain: { color: "#344039" },
@@ -46,6 +56,7 @@ export function ChangedLines(
   side: "before" | "after",
 ) {
   const lines = new Set<number>();
+  if (before === after || sourcePreview(before).truncated || sourcePreview(after).truncated) return lines;
   let position = 1;
   for (const part of diffLines(before, after)) {
     if ((side === "before" && part.added) || (side === "after" && part.removed))
@@ -74,6 +85,14 @@ export function CodeView({
   changed?: Set<number>;
   side?: "before" | "after";
 }) {
+  const preview = sourcePreview(code);
+  if (preview.truncated) return (
+    <div className="large-source-preview">
+      <p>Large file preview. The complete source stays in your export.</p>
+      <button type="button" onClick={() => downloadSource(code, path)}>Download complete file</button>
+      <pre aria-label={label} className="highlighted-code">{preview.text}</pre>
+    </div>
+  );
   const ext = path.split(".").pop();
   const language =
     ext === "json"
@@ -124,10 +143,19 @@ export function CodeView({
 export function UnifiedDiff({
   before,
   after,
+  path = "source.txt",
 }: {
   before: string;
   after: string;
+  path?: string;
 }) {
+  if (sourcePreview(before).truncated || sourcePreview(after).truncated) return (
+    <div className="large-source-preview">
+      <p>This file is too large for the inline diff. Download both versions for a complete comparison.</p>
+      <button type="button" onClick={() => downloadSource(before, `original-${path.split("/").at(-1)}`)}>Download original</button>{" "}
+      <button type="button" onClick={() => downloadSource(after, `proposal-${path.split("/").at(-1)}`)}>Download proposal</button>
+    </div>
+  );
   return (
     <pre className="unified-diff" aria-label="Unified source diff">
       {diffLines(before, after).flatMap((part, index) =>

@@ -63,6 +63,8 @@ import {
   Reveal,
 } from "./motion-ui";
 import { ChangedLines, CodeView, UnifiedDiff } from "./code-view";
+import { LIMITS, UPLOAD_SIZE_LABEL } from "@/lib/limits";
+import { lineReader } from "@/lib/ndjson";
 
 type Config = {
   configured: boolean;
@@ -118,7 +120,7 @@ const initialConfig: Config = {
 };
 const money = (value: number) => `$${value.toFixed(2)}`;
 const size = (bytes: number) =>
-  bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
+  bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 
 function download(data: Blob, name: string) {
   const url = URL.createObjectURL(data);
@@ -189,6 +191,7 @@ export default function Studio() {
   const [view, setView] = useState<View>("overview");
   const [config, setConfig] = useState<Config>(initialConfig);
   const [project, setProject] = useState<Project | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [originalReport, setOriginalReport] = useState<Report | null>(null);
   const [result, setResult] = useState<Migration | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -282,12 +285,14 @@ export default function Studio() {
       throw new Error(data.error ?? `Request failed (${response.status})`);
     return data;
   }
-  function acceptImport(data: { project: Project; report: Report }) {
+  function acceptImport(data: { project: Project; report: Report; projectId?: string }) {
     setProject(data.project);
+    setProjectId(data.projectId ?? null);
     setOriginalReport(data.report);
     setResult(null);
     setActivities([]);
-    setSelectedFile("manifest.json");
+    setFilePage(0);
+    setSelectedFile(data.project.source?.manifestPath ?? "manifest.json");
     setView("report");
     setError("");
   }
@@ -307,13 +312,32 @@ export default function Studio() {
       setBusy(null);
     }
   }
+  async function selectManifest(path: string) {
+    if (!project?.source || busy || path === project.source.manifestPath) return;
+    const manifest = project.files.find(f => f.path === path && f.encoding === "utf8");
+    if (!manifest) return;
+    setBusy("import");
+    setError("");
+    try {
+      const selected = {
+        ...project,
+        source: { ...project.source, manifestPath: path },
+        files: project.files.map(f => f.path === "manifest.json" ? { ...f, content: manifest.content } : f),
+      };
+      acceptImport(await responseJson(await fetch("/api/analyze", {
+        method: "POST", headers: headers(true), body: JSON.stringify(projectId ? { projectId, manifestPath: path } : { project: selected }),
+      })));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not analyze this manifest.");
+    } finally { setBusy(null); }
+  }
   async function upload(file?: File) {
     if (!file || busy) return;
     if (
       !file.name.toLowerCase().endsWith(".zip") ||
-      file.size > 8 * 1024 * 1024
+      file.size > LIMITS.upload
     ) {
-      setError("Choose an extension source ZIP of at most 8 MB.");
+      setError(`Choose an extension source ZIP of at most ${UPLOAD_SIZE_LABEL}.`);
       return;
     }
     setBusy("import");
@@ -392,7 +416,7 @@ export default function Studio() {
       const response = await fetch("/api/migrate", {
         method: "POST",
         headers: headers(true),
-        body: JSON.stringify({ project, mode }),
+        body: JSON.stringify(projectId ? { projectId, mode } : { project, mode }),
         signal: controller.signal,
       });
       if (!response.ok) {
@@ -402,7 +426,6 @@ export default function Studio() {
       const reader = response.body?.getReader();
       if (!reader) throw new Error("Migration stream is unavailable.");
       const decoder = new TextDecoder();
-      let pending = "";
       const consume = (line: string) => {
         if (!line.trim()) return;
         const event = JSON.parse(line) as StreamEvent;
@@ -419,22 +442,22 @@ export default function Studio() {
           completed = true;
         }
       };
+      const lines = lineReader(consume, LIMITS.request);
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        pending += decoder.decode(value, { stream: true });
-        const lines = pending.split("\n");
-        pending = lines.pop() ?? "";
-        lines.forEach(consume);
+        lines.push(decoder.decode(value, { stream: true }));
       }
-      pending += decoder.decode();
-      consume(pending);
+      lines.push(decoder.decode());
+      lines.finish();
       if (!completed)
         throw new Error("The migration stream ended before a result arrived.");
     } catch (e) {
       setError(
         e instanceof Error && e.name === "AbortError"
           ? "Migration cancelled. Check Otari usage before starting another AI job."
+          : e instanceof TypeError
+            ? `The connection to BridgeFox was interrupted. Keep this page open and check that the app server is running.${mode === "otari" ? " Otari may have processed a request; check gateway usage before starting another AI job." : " You can retry local rules once the connection is restored."}`
           : e instanceof Error
             ? e.message
             : "Migration failed.",
@@ -445,14 +468,14 @@ export default function Studio() {
     }
   }
   async function exportPackage() {
-    if (!project || !result || busy || blockers) return;
+    if (!project || !result || busy || (blockers && !project.source)) return;
     setBusy("export");
     setError("");
     try {
       const response = await fetch("/api/export", {
         method: "POST",
         headers: headers(true),
-        body: JSON.stringify({ original: project, patches: result.patches }),
+        body: JSON.stringify({ ...(projectId ? { projectId } : { original: project }), patches: result.patches, format: project.source ? "source" : "addon" }),
       });
       if (!response.ok) {
         await responseJson(response);
@@ -525,6 +548,11 @@ export default function Studio() {
   const [codeMode, setCodeMode] = useState<"split" | "unified">("split");
   const [focusEditor, setFocusEditor] = useState(false);
   const [fileQuery, setFileQuery] = useState("");
+  const [filePage, setFilePage] = useState(0);
+  const matchingFiles = project?.files.filter(f => f.path.toLowerCase().includes(fileQuery.toLowerCase())) ?? [];
+  const pageSize = 100;
+  const currentFilePage = Math.min(filePage, Math.max(0, Math.ceil(matchingFiles.length / pageSize) - 1));
+  const visibleFiles = matchingFiles.slice(currentFilePage * pageSize, (currentFilePage + 1) * pageSize);
   const reducedMotion = useReducedMotion();
   // The first client render must match SSR even when the device prefers reduced motion.
   const animate = appearanceReady && motionEnabled && !reducedMotion;
@@ -979,7 +1007,7 @@ export default function Studio() {
                                   Browse files
                                 </ActionButton>
                                 <span className="upload-limit">
-                                  .ZIP FILES · UP TO 8 MB
+                                  .ZIP FILES · UP TO {UPLOAD_SIZE_LABEL}
                                 </span>
                               </motion.div>
                             ) : (
@@ -1032,8 +1060,7 @@ export default function Studio() {
                                   </ActionButton>
                                 </div>
                                 <p>
-                                  One built extension root, ready for a closer
-                                  look.
+                                  A built extension or a source repository with browser manifest templates.
                                 </p>
                               </motion.form>
                             )}
@@ -1333,6 +1360,21 @@ export default function Studio() {
                         </ActionButton>
                       </div>
                     </div>
+                    {project.source && (
+                      <section className="source-repository-banner">
+                        <div>
+                          <strong>Source repository · build required</strong>
+                          <p>Choose a manifest template for analysis. All repository files are preserved. A Firefox template still needs a build and browser testing.</p>
+                        </div>
+                        <label>
+                          Manifest for analysis
+                          <select value={project.source.manifestPath} disabled={!!busy} onChange={e => void selectManifest(e.target.value)}>
+                            {project.source.manifestCandidates.map(path => <option key={path} value={path}>{path}</option>)}
+                          </select>
+                        </label>
+                      </section>
+                    )}
+                    <p className="project-session-note">Keep your original ZIP. This import expires after 30 minutes of inactivity or when the app restarts.</p>
                     <div className="flow-nav" aria-label="Migration stages">
                       {(
                         [
@@ -1744,17 +1786,11 @@ export default function Studio() {
                               <input
                                 aria-label="Search source files"
                                 value={fileQuery}
-                                onChange={(e) => setFileQuery(e.target.value)}
+                                onChange={(e) => { setFileQuery(e.target.value); setFilePage(0); }}
                                 placeholder="Find a file..."
                               />
                             </div>
-                            {project.files
-                              .filter((f) =>
-                                f.path
-                                  .toLowerCase()
-                                  .includes(fileQuery.toLowerCase()),
-                              )
-                              .map((file) => (
+                            {visibleFiles.map((file) => (
                                 <button
                                   key={file.path}
                                   onClick={() => setSelectedFile(file.path)}
@@ -1773,14 +1809,17 @@ export default function Studio() {
                                   ) && <span className="changed-dot" />}
                                 </button>
                               ))}
-                            {!project.files.some((f) =>
-                              f.path
-                                .toLowerCase()
-                                .includes(fileQuery.toLowerCase()),
-                            ) && (
+                            {!matchingFiles.length && (
                               <p className="file-search-empty">
                                 No files found.
                               </p>
+                            )}
+                            {matchingFiles.length > pageSize && (
+                              <div className="file-pagination">
+                                <small aria-live="polite">{currentFilePage * pageSize + 1}–{Math.min((currentFilePage + 1) * pageSize, matchingFiles.length)} of {matchingFiles.length}</small>
+                                <button aria-label="Previous source files" disabled={currentFilePage === 0} onClick={() => setFilePage(currentFilePage - 1)}>Previous</button>
+                                <button aria-label="Next source files" disabled={(currentFilePage + 1) * pageSize >= matchingFiles.length} onClick={() => setFilePage(currentFilePage + 1)}>Next</button>
+                              </div>
                             )}
                             <div className="file-tree-note">
                               <ShieldCheck size={14} />
@@ -1899,6 +1938,7 @@ export default function Studio() {
                                   <UnifiedDiff
                                     before={sourceFile.content}
                                     after={outputFile.content}
+                                    path={selectedFile}
                                   />
                                 ) : (
                                   <pre>
@@ -2071,12 +2111,12 @@ export default function Studio() {
                               03 / THE OTHER SIDE OF THE BRIDGE
                             </span>
                             <h2>
-                              {blockers
+                              {project.source ? "Your reviewed source repository." : blockers
                                 ? "A little more work before the move."
                                 : "Your extension. A new chapter."}
                             </h2>
                             <p>
-                              {blockers
+                              {project.source ? "Download the source and proposals, review the findings, then build the extension with its own toolchain." : blockers
                                 ? "Review the required redesigns before packaging. Your report has the next steps."
                                 : "Your Firefox candidate is packed and ready. Give it a real browser test before making yourself at home."}
                             </p>
@@ -2085,9 +2125,9 @@ export default function Studio() {
                                 <FileCode2 size={24} />
                               </span>
                               <div>
-                                <strong>{report.name}-firefox.zip</strong>
+                                <strong>{report.name}{project.source ? "-reviewed-source.zip" : "-firefox.zip"}</strong>
                                 <span>
-                                  {report.fileCount} files · original assets
+                                  {report.fileCount - (project.source ? 1 : 0)} files · original assets
                                   preserved
                                 </span>
                               </div>
@@ -2095,21 +2135,21 @@ export default function Studio() {
                                 className={`badge ${blockers ? "danger" : "success"}`}
                               >
                                 <span />
-                                {blockers ? "Blocked" : "Candidate"}
+                                {project.source ? "Build required" : blockers ? "Blocked" : "Candidate"}
                               </span>
                             </div>
                             <ActionButton
                               className="primary full-width"
                               motionEnabled={animate}
                               onClick={exportPackage}
-                              disabled={!!busy || blockers > 0}
+                              disabled={!!busy || (blockers > 0 && !project.source)}
                             >
                               {busy === "export" ? (
                                 <LoaderCircle className="spin" size={17} />
                               ) : (
                                 <Download size={17} />
                               )}
-                              Download Firefox ZIP
+                              {project.source ? "Download reviewed source ZIP" : "Download Firefox ZIP"}
                               <ArrowDownToLine size={16} />
                             </ActionButton>
                             <button
@@ -2122,8 +2162,7 @@ export default function Studio() {
                             </button>
                             <p className="export-disclaimer">
                               <LockKeyhole size={13} />
-                              For temporary testing. Not signed or published to
-                              Mozilla Add-ons.
+                              {project.source ? "Source files only. Build and verify the extension before installing it in Firefox." : "For temporary testing. Not signed or published to Mozilla Add-ons."}
                             </p>
                           </section>
                           <section className="validation-panel">
@@ -2185,7 +2224,13 @@ export default function Studio() {
                               </div>
                             )}
                           </section>
-                          <section className="install-instructions">
+                          {project.source ? (
+                            <section className="install-instructions">
+                              <h3>Build before installing.</h3>
+                              <p>The download preserves the repository and selected manifest proposals. Review its README, dependencies, and build scripts, then produce a Firefox build. Import that built ZIP into BridgeFox for packaging checks and test every feature in Firefox.</p>
+                              <p>BridgeFox does not run repository scripts or compile TypeScript. Compatibility findings remain open.</p>
+                            </section>
+                          ) : <section className="install-instructions">
                             <div className="install-heading">
                               <span>
                                 <FoxMark />
@@ -2255,7 +2300,7 @@ export default function Studio() {
                               Temporary add-ons are removed when Firefox
                               restarts.
                             </p>
-                          </section>
+                          </section>}
                         </div>
                       ) : (
                         <div className="no-result">
@@ -2537,8 +2582,7 @@ export default function Studio() {
                     <div>
                       <strong>Bring source you can modify.</strong>
                       <p>
-                        A built ZIP or a small public repository with one
-                        manifest root.
+                        A built ZIP or a source repository with browser manifest templates, up to 100 MB.
                       </p>
                     </div>
                   </li>

@@ -22,6 +22,8 @@ Attach an actual spending ceiling to the Otari API key. Configure role-specific 
 
 The workspace settings panel shows configuration presence, not a verified connection. Tool availability is inspected during a user-triggered AI migration. Once configured, choose **Otari · two-model workflow** in the compatibility screen.
 
+For a read-only connectivity check, run `npm run check:gateway-connection`. It calls `/tools` and records authentication and tool availability under `artifacts/connection/`, without sending paid model or tool operations. A browser-to-app interruption preserves the imported source and clears the busy state; inspect gateway usage before starting another AI job. Large streamed results are assembled from new chunks without repeatedly copying and rescanning the unfinished result.
+
 For a deliberate paid verification with the app running, use `npm run check:otari -- --run`. It sends one migration through the actual local API, saves streamed activities and the result, and exports the candidate under `artifacts/otari/`. It never retries a paid operation. Check the retained usage before running it again after a failure.
 
 The current selected weights are Apache 2.0: [Qwen3-235B-A22B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507) and [Qwen3-Coder-30B-A3B-Instruct](https://huggingface.co/Qwen/Qwen3-Coder-30B-A3B-Instruct). The catalogue and pinned license references are retained in [connection evidence](evidence/otari-connection-2026-11-06.json).
@@ -35,6 +37,8 @@ The current selected weights are Apache 2.0: [Qwen3-235B-A22B-Instruct-2507](htt
 5. Local checks reject invalid, stale, unsafe, permission-changing, feature-deleting, or incompatible patch batches atomically.
 6. `POST /code/execute`, if available: run an authored Python manifest/permission validator in Otari’s sandbox. Uploaded JavaScript is never executed. The sandbox tests manifest invariants, not Firefox behavior.
 7. Local static validation runs and the UI exposes actual gateway response metadata.
+
+Large imports retain the same bounded gateway workload: up to 90,000 source characters, supplied as whole files. The manifest and declared entrypoints take priority, followed by files with static findings. Binary assets and other omitted source remain in the archive. The report states how many source files were supplied, marks omitted source for manual review, and rejects AI patches outside the supplied files. A partial AI review is returned as `review`, even when its model and sandbox steps complete. Large manifests that cannot fit stop the AI path before any gateway request; local scan and export remain available.
 
 The client uses `Otari-Key`, follows no redirects, sends no automatic retries, and reads `Otari-Request-ID`, `Otari-Model`, `Otari-Provider`, `Otari-Fallback`, `Otari-Attempt-Count`, and `Otari-Guardrails`. These are reported only when received. A gateway routing policy controls actual fallback behavior; the application does not invent a fallback after a timeout.
 

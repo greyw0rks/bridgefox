@@ -1,5 +1,5 @@
 export type SourceFile = { path: string; content: string; encoding: "utf8" | "base64" };
-export type Project = { name: string; files: SourceFile[] };
+export type Project = { name: string; files: SourceFile[]; source?: { manifestPath: string; manifestCandidates: string[]; buildRequired: true } };
 export type Finding = {
   id: string; severity: "change" | "warning" | "blocked";
   title: string; detail: string; file: string; line?: number;

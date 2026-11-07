@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-11-06T23:40:07.043Z",
+  "paidOperations": 0,
+  "scope": "Read-only gateway tool discovery; no model, fetch tool, sandbox or migration requests.",
+  "reachable": true,
+  "status": 200,
+  "authenticated": true,
+  "tools": [
+    {
+      "type": "otari_web_fetch",
+      "available": false,
+      "reason": "workspace_disabled"
+    },
+    {
+      "type": "otari_web_search",
+      "available": false,
+      "reason": "workspace_disabled"
+    },
+    {
+      "type": "otari_code_execution",
+      "available": true,
+      "reason": null
+    }
+  ]
+}

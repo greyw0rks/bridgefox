@@ -1207,6 +1207,25 @@ svg {
   min-height: 37px;
   font-size: 11px;
 }
+.large-source-preview {
+  padding: 16px;
+}
+
+.large-source-preview p {
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.large-source-preview button {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
 .upload-limit {
   display: block;
   font-family: "IBM Plex Mono", monospace;
@@ -2102,7 +2121,13 @@ svg {
   background: var(--bg);
   padding: 15px 9px;
   min-width: 0;
+  max-height: 700px;
+  overflow-y: auto;
 }
+.file-tree > * { flex-shrink: 0; }
+.file-pagination { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; padding: 12px 0; }
+.file-pagination small { width: 100%; }
+.file-pagination button { padding: 7px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--ink); }
 .file-tree-heading {
   display: flex;
   justify-content: space-between;
@@ -4973,3 +4998,16 @@ svg {
     transition: none !important;
   }
 }
+.source-repository-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.source-repository-banner > div { flex: 1 1 260px; min-width: 0; }
+.source-repository-banner p { margin: 8px 0 0; }
+.source-repository-banner label { display: grid; gap: 8px; max-width: 100%; }
+.source-repository-banner select { width: 100%; max-width: 420px; padding: 10px; border-radius: 8px; }

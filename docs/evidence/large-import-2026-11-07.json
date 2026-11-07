@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-11-07T00:01:35.048Z",
+  "inputZipBytes": 22108183,
+  "inputFiles": 608,
+  "largeSourceBytes": 3150267,
+  "migrationRequestBytes": 67,
+  "previewBounded": true,
+  "fullSourceDownloadMatches": true,
+  "mobileAndDesktopWithoutOverflow": true,
+  "exportAssetsMatch": true,
+  "permissionsPreserved": true,
+  "pageErrors": [],
+  "mode": "local",
+  "paidOtariCalls": 0,
+  "scope": "Actual browser upload, Next.js migration/export endpoints, source download and exact output checks; no Firefox runtime or live Otari verification."
+}

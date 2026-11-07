@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-11-07T00:03:02.690Z",
+  "interruptedAiRequest": true,
+  "actionableMessage": true,
+  "sourceRetained": true,
+  "busyStateCleared": true,
+  "automaticRetries": 0,
+  "paidOperations": 0,
+  "scope": "Browser request deliberately aborted before reaching BridgeFox; no real Otari job or billing verification."
+}
