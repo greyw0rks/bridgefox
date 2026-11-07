@@ -1,10 +1,10 @@
 # Verification — November 7, 2026
 
-The local migration workflow and one genuine hosted Otari migration are verified. The November 6 hosted models reviewed Tab Pocket's local manifest conversion and proposed no additional code edits. Its exact exported candidate passed Firefox runtime checks. November 7 checks extend import limits and verify large source/asset preservation without making additional paid calls.
+The local migration workflow and the November 6 hosted Tab Pocket candidate are verified. That exact exported candidate passed Firefox runtime checks. November 7 checks extend import limits, verify large source/asset preservation, and reproduce then verify a fix for the Firefox Otari connection interruption with Rabby. The Rabby result remains a source review, with unresolved compatibility findings.
 
 | Check | Result |
 | --- | --- |
-| Pipeline tests | 37 passing: project-reference migration/export and expiry, fragmented migration-stream parsing, source migration/export, browser-template selection, virtual-manifest exclusion, assets above the old 32 MiB limit, large ZIP and JSON transport, large bundles/assets, entry/byte-limit rejection, API checks, archive safety, manifest/permission invariants, Host/origin authorization, large mocked GitHub import, mocked Otari roles/tools/costs/failures, bounded AI coverage, omitted-source patch rejection, and delayed usage settlement |
+| Pipeline tests | 45 passing: includes acknowledgement before migration execution, delayed-work keep-alives, cancellation before/during work, stream failure cleanup, real source manifest context and both-role patch coverage, plus the existing import/export, source preservation, permissions, HTTP authorization, bounded AI context, gateway costs/failures and delayed usage checks |
 | TypeScript | Passed standalone check and production build type checking |
 | Production build | Passed with Next.js 16.4.5 |
 | Add-on lint | Tab Pocket: zero errors, notices, or warnings with web-ext 10.8.0 |
@@ -15,12 +15,16 @@ The local migration workflow and one genuine hosted Otari migration are verified
 | Hosted Otari | Two distinct Qwen models and the Python sandbox completed; $0.010456 known job cost; candidate exported through actual Next.js endpoints |
 | Current gateway connectivity | November 7 read-only discovery returned HTTP 200 with the configured key. Sandbox available; web fetch/search remain `workspace_disabled`. No paid operation sent. |
 | Interrupted AI request | Browser request deliberately aborted before reaching the app: actionable connection/usage message, source retained, busy state cleared, no automatic retry. No paid job or billing record was tested. |
+| Rabby Firefox connection | Genuine Otari run reproduced a 57,834 ms header delay and `NS_ERROR_ABORT`; both model calls were recorded despite the lost result ($0.007744). After fixing repeated output scans and streaming startup, Firefox local headers arrived in 177 ms and first activity in 333 ms; the deliberate Otari check measured 200/394 ms and retained a review result in 40,983 ms with no errors. Verified run cost $0.008693, independently confirmed by read-only usage. |
+| Source AI manifest path | The live engineer targeted the virtual analysis copy; the patch batch was rejected before sandbox execution. The subsequent fix excludes the duplicate from AI input and rewrites manifest finding paths. Both-role mock transport verifies an accepted patch to the selected real manifest and synchronized analysis copy. No additional paid request verifies this context change. |
 | Hosted candidate lint | Exact exported ZIP: zero errors, notices, or warnings with web-ext 10.8.0 |
 | Hosted candidate Firefox | Exact ZIP installed in Firefox 141.0; real tab saved, persisted across popup reload, and reopened |
 
 The pipeline/GitHub/Otari network checks use mock transports and make no paid requests. The UI check exercises actual local HTTP endpoints and downloads the generated ZIP.
 
 November 7 evidence: [large import](evidence/large-import-2026-11-07.json), [Rabby source import](evidence/rabby-source-import-2026-11-07.json), [read-only gateway connection](evidence/gateway-connection-2026-11-07.json), and [interrupted AI request](evidence/network-error-2026-11-07.json). Reproduce with `npm run check:large-import`, `npm run check:source-import -- /path/to/Rabby-develop.zip`, `npm run check:gateway-connection`, and `npm run check:network-error`. The last check deliberately aborts the browser request; it does not retry a paid operation.
+
+[Firefox migration connection evidence](evidence/migration-connection-2026-11-07.json) includes the genuine failure, repaired local/live checks, request IDs, role costs, preserved activities and gateway usage. Reproduce with `npm run check:migration-connection -- --firefox --archive /path/to/Rabby-develop.zip`; add `--run` only for deliberate paid verification. Both incident submissions together cost $0.016437; neither was automatically retried. Partial source coverage and rejected proposals are not proof of Firefox compatibility.
 
 The Firefox runtime test uses Mozilla geckodriver in a disposable profile. It invokes Firefox’s native `activeTab` grant to simulate toolbar activation, then operates the actual extension popup and storage APIs. It does not add manifest permissions or use the participant’s own browser profile. This proves the included fixture’s tested behavior, not arbitrary extension portability. The participant should still click the toolbar action and demonstrate the extension in their own recording.
 

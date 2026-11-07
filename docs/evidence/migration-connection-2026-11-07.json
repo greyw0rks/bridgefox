@@ -1,0 +1,363 @@
+{
+  "checkedAt": "2026-11-07T00:42:06.372Z",
+  "project": "Rabby source repository",
+  "archiveFiles": 3225,
+  "analyzedFiles": 3226,
+  "beforeFix": {
+    "checkedAt": "2026-11-07T00:28:19.727Z",
+    "base": "http://localhost:3035",
+    "browser": "firefox",
+    "mode": "otari",
+    "requestCount": 1,
+    "timeToHeadersMs": 57834,
+    "requests": [
+      {
+        "url": "http://localhost:3035/api/migrate",
+        "status": 200,
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "cache-control": "no-store",
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+          "content-type": "application/x-ndjson",
+          "x-accel-buffering": "no",
+          "date": "Sat, 07 Nov 2026 00:27:14 GMT",
+          "connection": "keep-alive",
+          "keep-alive": "timeout=5",
+          "transfer-encoding": "chunked"
+        }
+      },
+      {
+        "url": "http://localhost:3035/api/migrate",
+        "failure": "NS_ERROR_ABORT"
+      }
+    ],
+    "errors": [
+      "Response body: Error: response.text: Protocol error (Network.getResponseBody): Request \"10737418263\" is not found\nResponse body is not available for a response that was navigated away from. Read response.body() before triggering any navigation."
+    ],
+    "alert": [
+      "The connection to BridgeFox was interrupted. Keep this page open and check that the app server is running. Otari may have processed a request; check gateway usage before starting another AI job."
+    ],
+    "activities": [
+      "Compatibility scan",
+      "Deterministic migration",
+      "AI source coverage",
+      "Gateway tool discovery",
+      "Firefox documentation fetch",
+      "Compatibility analyst",
+      "Migration engineer"
+    ],
+    "directory": "artifacts/migration-connection/2026-11-07T00-25-54-002Z"
+  },
+  "afterFix": {
+    "local": {
+      "checkedAt": "2026-11-07T00:38:34.429Z",
+      "base": "http://localhost:3035",
+      "browser": "firefox",
+      "mode": "local",
+      "requestCount": 1,
+      "timeToHeadersMs": 177,
+      "timeToActivityMs": 333,
+      "elapsedMs": 11644,
+      "requests": [
+        {
+          "url": "http://localhost:3035/api/migrate",
+          "status": 200,
+          "headers": {
+            "x-content-type-options": "nosniff",
+            "x-frame-options": "DENY",
+            "referrer-policy": "no-referrer",
+            "cache-control": "no-store, no-transform",
+            "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+            "content-type": "application/x-ndjson; charset=utf-8",
+            "x-accel-buffering": "no",
+            "date": "Sat, 07 Nov 2026 00:38:22 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5",
+            "transfer-encoding": "chunked"
+          }
+        }
+      ],
+      "errors": [],
+      "alert": [],
+      "activities": [
+        "Compatibility scan",
+        "Deterministic migration",
+        "Otari workflow",
+        "Static validation"
+      ],
+      "spentUsd": 0,
+      "costComplete": true,
+      "status": "review",
+      "roles": [],
+      "directory": "artifacts/migration-connection/2026-11-07T00-38-02-729Z"
+    },
+    "otari": {
+      "checkedAt": "2026-11-07T00:39:46.317Z",
+      "base": "http://localhost:3035",
+      "browser": "firefox",
+      "mode": "otari",
+      "requestCount": 1,
+      "timeToHeadersMs": 200,
+      "timeToActivityMs": 394,
+      "elapsedMs": 40983,
+      "requests": [
+        {
+          "url": "http://localhost:3035/api/migrate",
+          "status": 200,
+          "headers": {
+            "x-content-type-options": "nosniff",
+            "x-frame-options": "DENY",
+            "referrer-policy": "no-referrer",
+            "cache-control": "no-store, no-transform",
+            "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+            "content-type": "application/x-ndjson; charset=utf-8",
+            "x-accel-buffering": "no",
+            "date": "Sat, 07 Nov 2026 00:39:05 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5",
+            "transfer-encoding": "chunked"
+          }
+        }
+      ],
+      "errors": [],
+      "alert": [],
+      "activities": [
+        "Compatibility scan",
+        "Deterministic migration",
+        "AI source coverage",
+        "Gateway tool discovery",
+        "Firefox documentation fetch",
+        "Compatibility analyst",
+        "Migration engineer",
+        "AI workflow stopped",
+        "Static validation"
+      ],
+      "spentUsd": 0.008693,
+      "costComplete": true,
+      "status": "review",
+      "roles": [
+        {
+          "label": "Gateway tool discovery",
+          "status": "complete",
+          "detail": "Otari responded in 1.6s."
+        },
+        {
+          "label": "Compatibility analyst",
+          "status": "complete",
+          "requestId": "10879ab9-4fa3-48e1-ace0-1464e04befa0",
+          "costUsd": 0.002931,
+          "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+          "detail": "Otari responded in 14.5s."
+        },
+        {
+          "label": "Migration engineer",
+          "status": "complete",
+          "requestId": "ec6c16de-df87-428a-8515-3be05345f526",
+          "costUsd": 0.005762,
+          "model": "qwen.qwen3-coder-30b-a3b-v1:0",
+          "detail": "Otari responded in 11.1s."
+        }
+      ],
+      "directory": "artifacts/migration-connection/2026-11-07T00-38-44-515Z"
+    },
+    "activities": [
+      {
+        "id": "ddb65249-724e-46c8-8ad6-bea66d05afd5",
+        "label": "Compatibility scan",
+        "detail": "3226 files analyzed; 30 findings.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-07T00:39:07.654Z"
+      },
+      {
+        "id": "01a1e311-61b9-474b-9c5e-2f3dc790bbd3",
+        "label": "Deterministic migration",
+        "detail": "0 file patches proposed; all original permissions preserved.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-07T00:39:11.949Z"
+      },
+      {
+        "id": "6306c496-a145-4607-9a26-047121977536",
+        "label": "AI source coverage",
+        "detail": "27 of 1949 source files supplied in full (89,963 characters). 1922 files remain outside AI review; all stay in the export.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-07T00:39:14.002Z"
+      },
+      {
+        "id": "80aa05aa-04d0-4df6-a04d-d9a02f6bddf9",
+        "label": "Gateway tool discovery",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-07T00:39:15.573Z",
+        "data": {},
+        "detail": "Otari responded in 1.6s."
+      },
+      {
+        "id": "befa20ed-c304-415c-ab41-0fcf8577b034",
+        "label": "Firefox documentation fetch",
+        "detail": "Otari web fetch is unavailable on this key. Static MDN references remain in the report.",
+        "status": "skipped",
+        "origin": "local",
+        "timestamp": "2026-11-07T00:39:15.574Z"
+      },
+      {
+        "id": "c60c0f62-424b-4b79-b507-7990e49b7834",
+        "label": "Compatibility analyst",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-07T00:39:30.117Z",
+        "requestId": "10879ab9-4fa3-48e1-ace0-1464e04befa0",
+        "costUsd": 0.002931,
+        "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "fallback": false,
+        "attempts": 1,
+        "data": {
+          "provider": "deepinfra",
+          "finishReason": "stop",
+          "promptTokens": 31221,
+          "completionTokens": 221
+        },
+        "detail": "Otari responded in 14.5s."
+      },
+      {
+        "id": "46f6105b-b01a-47a9-8e75-95e3b055a3d2",
+        "label": "Migration engineer",
+        "status": "complete",
+        "origin": "otari",
+        "timestamp": "2026-11-07T00:39:41.235Z",
+        "requestId": "ec6c16de-df87-428a-8515-3be05345f526",
+        "costUsd": 0.005762,
+        "model": "qwen.qwen3-coder-30b-a3b-v1:0",
+        "fallback": false,
+        "attempts": 1,
+        "data": {
+          "provider": "bedrock",
+          "finishReason": "stop",
+          "promptTokens": 31486,
+          "completionTokens": 1731
+        },
+        "detail": "Otari responded in 11.1s."
+      },
+      {
+        "id": "12c0775c-f65f-4185-80eb-fefa7558b07a",
+        "label": "AI workflow stopped",
+        "detail": "Patch the selected source manifest path; the root manifest is an analysis copy",
+        "status": "failed",
+        "origin": "local",
+        "timestamp": "2026-11-07T00:39:41.238Z"
+      },
+      {
+        "id": "207dea8b-bdbf-44a6-ad23-0d988f3977a0",
+        "label": "Static validation",
+        "detail": "2 checks passed. Firefox runtime testing is still required.",
+        "status": "complete",
+        "origin": "local",
+        "timestamp": "2026-11-07T00:39:44.675Z"
+      }
+    ]
+  },
+  "usage": {
+    "checkedAt": "2026-11-07T00:40:10.269Z",
+    "totals": {
+      "cost": 0.031231,
+      "prompt_tokens": 133632,
+      "completion_tokens": 6703,
+      "total_tokens": 140335,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "cache_write_1h_tokens": 0,
+      "reasoning_tokens": 0,
+      "request_count": 13,
+      "error_count": 2,
+      "avg_latency_ms": 6772.615384615385,
+      "unpriced_requests": 1,
+      "billed_input_tokens": 133632,
+      "billed_output_tokens": 6703
+    },
+    "today": {
+      "bucket_start": "2026-11-07T00:00:00Z",
+      "cost": 0.016437,
+      "tokens": 127687,
+      "requests": 4,
+      "errors": 0,
+      "input_tokens": 125355,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 0,
+      "output_tokens": 2332
+    },
+    "budget": {
+      "budgets_enforced": true,
+      "remaining_usd": null,
+      "limits": []
+    }
+  },
+  "paidVerification": {
+    "migrationSubmissions": 2,
+    "automaticRetries": 0,
+    "reproductionCostUsd": 0.007744,
+    "connectionVerificationCostUsd": 0.008693,
+    "totalCostUsd": 0.016437
+  },
+  "limits": [
+    "The connection remained open and delivered a review result; this does not establish Rabby Firefox compatibility.",
+    "The verified live engineer proposal targeted the virtual analysis manifest and was rejected atomically. Its billed cost was retained; no sandbox was called.",
+    "The subsequent AI context fix excludes the virtual manifest and rewrites analysis finding paths to the selected source path. That change is tested with mock transport, without another paid request.",
+    "Web fetch remains disabled; gateway key ceilings were not demonstrated."
+  ],
+  "finalLocalCheck": {
+    "checkedAt": "2026-11-07T00:43:59.140Z",
+    "base": "http://localhost:3035",
+    "browser": "firefox",
+    "mode": "local",
+    "requestCount": 1,
+    "timeToHeadersMs": 211,
+    "timeToActivityMs": 410,
+    "elapsedMs": 12516,
+    "requests": [
+      {
+        "url": "http://localhost:3035/api/migrate",
+        "status": 200,
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "cache-control": "no-store, no-transform",
+          "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+          "content-type": "application/x-ndjson; charset=utf-8",
+          "x-accel-buffering": "no",
+          "date": "Sat, 07 Nov 2026 00:43:46 GMT",
+          "connection": "keep-alive",
+          "keep-alive": "timeout=5",
+          "transfer-encoding": "chunked"
+        }
+      }
+    ],
+    "errors": [],
+    "alert": [],
+    "activities": [
+      "Compatibility scan",
+      "Deterministic migration",
+      "Otari workflow",
+      "Static validation"
+    ],
+    "spentUsd": 0,
+    "costComplete": true,
+    "status": "review",
+    "roles": [],
+    "directory": "artifacts/migration-connection/2026-11-07T00-43-26-830Z"
+  },
+  "validation": {
+    "pipelineTests": {
+      "passed": 45,
+      "failed": 0
+    },
+    "productionBuild": "passed",
+    "buildTypecheck": "passed",
+    "browserUiCheckGroups": 10,
+    "finalPreview": "http://localhost:3035"
+  }
+}

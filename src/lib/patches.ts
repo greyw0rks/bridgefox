@@ -67,9 +67,10 @@ export function applyPatches(project: Project, patches: Patch[]): Project {
   if (JSON.stringify(strippedSettings(before)) !== JSON.stringify(strippedSettings(after))) throw new Error("Guardrail rejected Firefox settings changes");
   if (before.browser_specific_settings?.gecko?.id && before.browser_specific_settings.gecko.id !== after.browser_specific_settings?.gecko?.id) throw new Error("Guardrail rejected an add-on identity change");
   const existingBlockers = analyze(project).findings.filter(f => f.severity === "blocked");
-  const newBlockers = analyze(output).findings.filter(f => f.severity === "blocked" && !existingBlockers.some(o => o.rule === f.rule && o.file === f.file));
+  const outputFindings = analyze(output).findings;
+  const newBlockers = outputFindings.filter(f => f.severity === "blocked" && !existingBlockers.some(o => o.rule === f.rule && o.file === f.file));
   if (newBlockers.length) throw new Error(`Patch introduced a blocker: ${newBlockers[0].title}`);
-  const resolvedBlocker = existingBlockers.find(f => !f.automatic && f.rule !== "syntax" && !analyze(output).findings.some(o => o.rule === f.rule && o.file === f.file));
+  const resolvedBlocker = existingBlockers.find(f => !f.automatic && f.rule !== "syntax" && !outputFindings.some(o => o.rule === f.rule && o.file === f.file));
   if (resolvedBlocker) throw new Error(`Manual redesign required: ${resolvedBlocker.title}. AI cannot automatically clear this original blocker.`);
   return output;
 }

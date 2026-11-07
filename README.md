@@ -68,6 +68,8 @@ The Firefox runtime check uses Python 3’s standard library and Mozilla geckodr
 
 For a deliberately paid verification, start the configured app and run `npm run check:otari -- --run`. Results are retained under `artifacts/otari/`. To test that exact output, set `BRIDGEFOX_ADDON_ZIP` to its ZIP, `BRIDGEFOX_MIGRATION_REPORT` to its `migration.json`, and optionally `BRIDGEFOX_FIREFOX_ARTIFACT` to a separate output directory before running the Firefox check. Inspect retained costs before repeating a failed live run.
 
+To check the browser connection with a large source repository, run `npm run check:migration-connection -- --firefox --archive /path/to/source.zip` against the running app. It uses local rules by default; adding `--run` deliberately starts a paid Otari migration. Timings, activity summaries, request IDs, costs and screenshots are retained under `artifacts/migration-connection/`. Migration responses acknowledge acceptance before scanning and send blank NDJSON keep-alives every ten seconds while awaiting work. Cancelling a response aborts the job and clears its timers. Patch validation scans the output once rather than once per original blocker.
+
 ## Install a candidate
 
 Extract the downloaded ZIP. In desktop Firefox, visit `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select the extracted `manifest.json`. Test each feature. Temporary add-ons disappear on browser restart. Permanent distribution requires the usual Mozilla signing and review process.
@@ -81,6 +83,8 @@ ZIP and GitHub imports accept archives up to **100 MB**, **256 MB extracted**, *
 The local project store holds at most four projects and 512 MiB of expanded files. Imports expire after 30 minutes of inactivity, on eviction, or when the app restarts; expired requests return a clear re-upload message. Keep the original ZIP. Project references require one persistent Node.js process; deployments with separate instances need shared project storage. This store does not provide durable accounts or storage.
 
 Source repositories with TypeScript, package build scripts, and browser manifest templates are imported for source analysis. Choose the template in **Manifest for analysis**; Chrome MV3 is selected first when available. The complete repository is preserved. The virtual root manifest exists only for analysis and is excluded from **Download reviewed source ZIP**. Source exports remain available with unresolved findings, and must be reviewed and built before installation. Rabby's source ZIP fits these limits; its existing Firefox manifest is a template, not proof of compatibility.
+
+AI context contains the selected source manifest at its real path and excludes the virtual analysis copy. Manifest findings supplied to the models also reference that selected path. Local patch guards still reject edits to the virtual copy or an unselected template.
 
 Large text files use a bounded inline preview with full-file downloads. The file browser shows 100 files per page and searches the entire project. Large migration results are assembled from streamed chunks without repeatedly rescanning the unfinished result. Otari receives up to 90,000 source characters as complete files, prioritizing the manifest, declared entrypoints, and files with findings. Files outside that context stay in static scans and exports, cannot receive AI patches, and are explicitly marked for manual review. The existing job spending threshold still applies.
 

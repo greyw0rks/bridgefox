@@ -18,6 +18,7 @@
     "check:source-import": "tsx scripts/check-source-import.ts",
     "check:gateway-connection": "node scripts/check-gateway-connection.mjs",
     "check:network-error": "tsx scripts/check-network-error.ts",
+    "check:migration-connection": "tsx scripts/check-migration-connection.ts",
     "demo:zip": "tsx scripts/demo-zip.ts",
     "lint:addon": "web-ext lint --source-dir fixtures/tab-pocket --warnings-as-errors",
     "sync:compat": "node scripts/sync-compat.mjs",

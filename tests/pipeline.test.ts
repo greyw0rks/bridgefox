@@ -419,6 +419,52 @@ test("large projects complete a bounded AI review and retain omitted source for 
     assert.equal((await importZip(exported.bytes, exported.name)).files.find(f => f.path === large.path)?.content, large.content);
   } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
 });
+test("source AI context includes only the real selected manifest and rewrites analysis finding paths", () => {
+  const project = clone();
+  const path = "src/manifests/chrome/manifest.json";
+  project.source = { manifestPath: path, manifestCandidates: [path], buildRequired: true };
+  project.files.push({ ...project.files[0], path });
+  const report = analyze(project);
+  assert.ok(report.findings.some(f => f.file === "manifest.json"));
+  const context = selectAiContext(project, report);
+  assert.equal(context.files[0].path, path);
+  assert.equal(context.files.some(f => f.path === "manifest.json"), false);
+  assert.equal(context.findings.findings.some(f => f.file === "manifest.json"), false);
+  assert.equal(context.sourceFileCount, project.files.filter(f => f.path !== "manifest.json" && /\.(json|js|html|css)$/.test(f.path)).length);
+  project.files[0].content = project.files.at(-1)!.content = " ".repeat(AI_SOURCE_CHAR_LIMIT) + project.files[0].content;
+  assert.throws(() => selectAiContext(project, report), /manifest exceeds/);
+});
+test("both Otari roles use real source paths and validated source patches synchronize the analysis copy", async () => {
+  const env = { ...process.env }; const previousFetch = globalThis.fetch;
+  Object.assign(process.env, { OTARI_BASE_URL: "https://test.otari.invalid/api/v1", OTARI_API_KEY: "test-key", OTARI_ANALYST_MODEL: "a", OTARI_ENGINEER_MODEL: "b" });
+  const project = clone();
+  const path = "src/manifests/chrome/manifest.json";
+  project.source = { manifestPath: path, manifestCandidates: [path], buildRequired: true };
+  project.files.push({ ...project.files[0], path });
+  const manifest = readManifest(project);
+  manifest.background = { scripts: ["background.js"] };
+  const after = JSON.stringify(manifest, null, 2) + "\n";
+  let completions = 0;
+  globalThis.fetch = async (url, options) => {
+    if (String(url).endsWith("/tools")) return Response.json({ data: [] });
+    completions++;
+    const input = JSON.parse(JSON.parse(String(options?.body)).messages[1].content);
+    assert.equal(input.files.some((f: { path: string }) => f.path === "manifest.json"), false);
+    assert.equal(input.files[0].path, path);
+    assert.equal(input.scope.sourceRepository.manifestPath, path);
+    assert.equal(input.findings.findings.some((f: { file: string }) => f.file === "manifest.json"), false);
+    return Response.json({ choices: [{ message: { content: JSON.stringify({ summary: "Review selected template", patches: completions === 1 ? [] : [{ path, before: project.files[0].content, after, reason: "Use Firefox background scripts" }] }) } }], usage: { cost_usd: ".001" } });
+  };
+  try {
+    const result = await migrate(project, "otari", () => {});
+    assert.equal(completions, 2);
+    assert.equal(result.status, "review");
+    assert.equal(result.activities.some(a => a.status === "failed"), false);
+    assert.equal(result.patches[0].path, path);
+    assert.equal(result.project.files[0].content, after);
+    assert.equal(result.project.files.find(f => f.path === path)?.content, after);
+  } finally { globalThis.fetch = previousFetch; for (const key of Object.keys(process.env)) if (!(key in env)) delete process.env[key]; Object.assign(process.env, env); }
+});
 test("AI cannot patch a file omitted from its bounded review", async () => {
   const env = { ...process.env }; const previousFetch = globalThis.fetch;
   Object.assign(process.env, { OTARI_BASE_URL: "https://test.otari.invalid/api/v1", OTARI_API_KEY: "test-key", OTARI_ANALYST_MODEL: "a", OTARI_ENGINEER_MODEL: "b" });
