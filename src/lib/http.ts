@@ -2,21 +2,37 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { LIMITS } from "./limits";
 
-export function authorize(request: Request) {
+export function authorize(request: Request, requireAccess = false) {
   // Next.js can construct request.url using its configured server hostname.
   // Compare the browser origin with the HTTP Host it actually requested.
   const target = new URL(request.url);
   const hostHeader = request.headers.get("host");
   if (hostHeader) {
     if (!/^[a-zA-Z0-9.\-[\]:]+$/.test(hostHeader)) throw new HttpError(400, "Invalid request host");
-    try { target.host = new URL(`${target.protocol}//${hostHeader}`).host; }
+    try {
+      const requestedHost = new URL(`${target.protocol}//${hostHeader}`);
+      target.hostname = requestedHost.hostname;
+      target.port = requestedHost.port;
+    }
     catch { throw new HttpError(400, "Invalid request host"); }
   }
+  const configuredOrigin = process.env.BRIDGEFOX_PUBLIC_ORIGIN?.trim();
+  if (configuredOrigin) {
+    let publicUrl: URL;
+    try { publicUrl = new URL(configuredOrigin); }
+    catch { throw new HttpError(503, "Configure a valid public workspace origin"); }
+    if (publicUrl.protocol !== "https:" || publicUrl.username || publicUrl.password || publicUrl.pathname !== "/" || publicUrl.search || publicUrl.hash) throw new HttpError(503, "Configure a clean HTTPS public workspace origin");
+    if (target.host !== publicUrl.host) throw new HttpError(403, "Unexpected workspace host");
+    // TLS terminates at the hosting proxy. Trust only the configured public URL,
+    // never client-controlled forwarded protocol or host headers.
+    target.protocol = publicUrl.protocol;
+  }
   const expected = process.env.BRIDGEFOX_ACCESS_TOKEN;
-  if (expected) {
+  const publicDemo = process.env.BRIDGEFOX_PUBLIC_DEMO === "1";
+  if (expected && (!publicDemo || requireAccess)) {
     const supplied = request.headers.get("x-bridgefox-access") ?? "";
     if (!timingSafeEqual(createHash("sha256").update(supplied).digest(), createHash("sha256").update(expected).digest())) throw new HttpError(401, "Enter the workspace access password");
-  } else {
+  } else if (!publicDemo || requireAccess) {
     // A publicly exposed process must be explicitly protected, including its AI budget.
     const host = target.hostname;
     if (!["localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"].includes(host) && !host.endsWith(".localhost")) throw new HttpError(503, "Set BRIDGEFOX_ACCESS_TOKEN before exposing this workspace publicly");
@@ -51,4 +67,12 @@ export function errorResponse(error: unknown) {
   const status = error instanceof HttpError ? error.status : 400;
   const message = error instanceof z.ZodError ? "The extension or patch data is invalid" : error instanceof Error ? error.message : "Request failed";
   return Response.json({ error: message }, { status });
+}
+export function streamedJson(value: unknown) {
+  const bytes = new TextEncoder().encode(JSON.stringify(value));
+  let offset = 0;
+  return new Response(new ReadableStream<Uint8Array>({ pull(controller) {
+    if (offset >= bytes.length) { controller.close(); return; }
+    controller.enqueue(bytes.subarray(offset, offset + 64 * 1024)); offset += 64 * 1024;
+  } }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 }

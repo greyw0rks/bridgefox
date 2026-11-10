@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { importZip, LIMITS } from "@/lib/archive";
 import { analyze } from "@/lib/analyzer";
-import { editorProject, rememberProject } from "@/lib/project-store";
-import { authorize, boundedBody, errorResponse, HttpError, readJson } from "@/lib/http";
+import { editorProject, saveProject } from "@/lib/project-store";
+import { authorize, boundedBody, errorResponse, HttpError, readJson, streamedJson } from "@/lib/http";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 export async function POST(request: Request) {
@@ -17,6 +17,6 @@ export async function POST(request: Request) {
     const bytes = await boundedBody(new Request("https://codeload.github.com", { method: "POST", body: response.body, duplex: "half", headers: response.headers } as RequestInit), LIMITS.upload);
     const project = await importZip(Buffer.from(bytes), parts[1]);
     const report = analyze(project);
-    return Response.json({ projectId: rememberProject(project), project: editorProject(project), report });
+    return streamedJson({ projectId: await saveProject(project), project: editorProject(project), report });
   } catch (error) { return errorResponse(error); }
 }

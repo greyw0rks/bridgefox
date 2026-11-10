@@ -6,14 +6,14 @@ One-line description: A compatibility studio that analyzes Chrome extension sour
 
 Branch: `hackathon/bridgefox`.
 
-The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cutoff timezone in the official submission form. Live two-model and sandbox evidence is recorded. Repository visibility, registration email, participant videos, and submission confirmation remain pending.
+The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cutoff timezone in the official submission form. Live two-model and sandbox evidence is recorded. Public source is at https://github.com/greyw0rks/bridgefox and the full studio is at https://bridgefox.vercel.app. The registration email, participant videos, feedback, and submission confirmation remain pending. The seven requested fields are collected in [SUBMISSION-FIELDS.md](SUBMISSION-FIELDS.md).
 
 ## Before submitting
 
 - [x] Star `mozilla-ai/otari` (confirmed through GitHub).
 - [ ] Complete DoraHacks registration and record the registration email privately.
-- [ ] Publish the project repository and provide its public URL and branch.
-- [ ] Link the first branch commit that introduced Otari (`git log --reverse -- src/lib/otari.ts`).
+- [x] Publish the project repository: https://github.com/greyw0rks/bridgefox, branch `hackathon/bridgefox`.
+- [x] First Otari commit: https://github.com/greyw0rks/bridgefox/commit/70cad69.
 - [x] Complete a funded request and configure two distinct available open-weight models, with published license references.
 - [x] Perform a genuine Otari migration and save returned models, usage, and successful sandbox evidence; verify its exact exported ZIP in Firefox.
 - [ ] Enable and demonstrate web fetch if claiming it; demonstrate routing/fallback, gateway guardrails, and key ceilings before claiming those features.

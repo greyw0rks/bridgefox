@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.git/
+.env*
+.atlas/
+.data/
+artifacts/
+demo-video/
+*.tsbuildinfo
+__pycache__/
+*.pyc

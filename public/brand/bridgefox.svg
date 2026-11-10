@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">BridgeFox</title>
+  <desc id="desc">A geometric coral fox with a cream face on a rounded dark green square.</desc>
+  <rect width="64" height="64" rx="16" fill="#26312c"/>
+  <path d="M9 10 25 21h14L55 10l-5 31-18 14-18-14Z" fill="#ed6548"/>
+  <path d="m17 26 15 8 15-8-8 17-7 6-7-6Z" fill="#fff2df"/>
+  <path d="m27 39 5 4 5-4Z" fill="#35271d"/>
+</svg>

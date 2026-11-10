@@ -73,6 +73,8 @@ type Config = {
   budgetUsd: number;
   guardrail: string | null;
   accessRequired: boolean;
+  directUploads?: boolean;
+  aiAccessRequired?: boolean;
 };
 type History = {
   id: string;
@@ -343,17 +345,15 @@ export default function Studio() {
     setBusy("import");
     setError("");
     try {
-      const form = new FormData();
-      form.append("file", file);
-      acceptImport(
-        await responseJson(
-          await fetch("/api/import", {
-            method: "POST",
-            headers: headers(),
-            body: form,
-          }),
-        ),
-      );
+      if (config?.directUploads) {
+        const { uploadUrl } = await responseJson(await fetch("/api/upload", { method: "POST", headers: headers() }));
+        const { storageId } = await responseJson(await fetch(uploadUrl, { method: "POST", headers: { "Content-Type": "application/zip" }, body: file }));
+        acceptImport(await responseJson(await fetch("/api/import", { method: "POST", headers: headers(true), body: JSON.stringify({ storageId, name: file.name }) })));
+      } else {
+        const form = new FormData();
+        form.append("file", file);
+        acceptImport(await responseJson(await fetch("/api/import", { method: "POST", headers: headers(), body: form })));
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import failed.");
     } finally {
@@ -479,6 +479,13 @@ export default function Studio() {
       });
       if (!response.ok) {
         await responseJson(response);
+        return;
+      }
+      if (response.headers.get("content-type")?.includes("application/json")) {
+        const { downloadUrl, name } = await responseJson(response);
+        const stored = await fetch(downloadUrl);
+        if (!stored.ok) throw new Error("The exported package could not be downloaded");
+        download(await stored.blob(), name);
         return;
       }
       const filename =
@@ -2483,7 +2490,7 @@ export default function Studio() {
                     Fallbacks and key spending limits are configured in Otari;
                     tool availability is checked when an AI job runs.
                   </p>
-                  {config.accessRequired && (
+                  {(config.accessRequired || config.aiAccessRequired) && (
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();

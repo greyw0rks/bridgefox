@@ -57,6 +57,11 @@ try {
   await page
     .getByRole("button", { name: "Open settings", exact: true })
     .click();
+  const config = await (await page.request.get(`${base}/api/status`)).json();
+  if (config.accessRequired || config.aiAccessRequired) {
+    await page.getByLabel("Workspace access password").waitFor();
+    checks.push("Protected Otari access has an available password field");
+  }
   for (const [name, theme] of [
     ["After hours", "dusk"],
     ["Garden studio", "meadow"],

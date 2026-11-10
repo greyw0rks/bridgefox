@@ -1,0 +1,16 @@
+{
+  "testedAt": "2026-11-10T17:34:47.213Z",
+  "base": "https://bridgefox.vercel.app",
+  "checks": [
+    "Public local studio uses shared storage; AI access remains protected",
+    "A ZIP above the serverless request limit uploads directly and imports through Convex",
+    "A separate migration request loads the stored project and streams a real local result",
+    "Export downloads from Convex and preserves the exact binary asset and large source",
+    "Anonymous Otari execution is rejected before any paid gateway call",
+    "Foreign browser origins cannot create upload URLs"
+  ],
+  "uploadBytes": 6303787,
+  "exportedBytes": 6303823,
+  "binarySha256": "dcca1679ea9b164449da360ffdd6ba5c769f5f0237901271c0291a79ec425f95",
+  "liveOtariCalls": 0
+}

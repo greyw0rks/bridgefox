@@ -9,3 +9,6 @@ web-ext-artifacts/
 .atlas/
 __pycache__/
 *.pyc
+.vercel
+demo-video/.hyperframes/
+demo-video/assets/audio/voice/raw/

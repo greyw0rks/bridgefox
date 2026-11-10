@@ -12,7 +12,7 @@ export function otariConfig() {
 }
 export function publicConfig() {
   const c = otariConfig();
-  return { configured: c.configured, analyst: c.analyst ?? null, engineer: c.engineer ?? null, budgetUsd: c.budget, guardrail: c.guardrail ?? null, accessRequired: Boolean(process.env.BRIDGEFOX_ACCESS_TOKEN), features: { webFetch: "checked on connection", sandbox: "checked on connection", routing: "configured in Otari", budgets: "configure an Otari key spend ceiling" } };
+  return { configured: c.configured, analyst: c.analyst ?? null, engineer: c.engineer ?? null, budgetUsd: c.budget, guardrail: c.guardrail ?? null, accessRequired: Boolean(process.env.BRIDGEFOX_ACCESS_TOKEN) && process.env.BRIDGEFOX_PUBLIC_DEMO !== "1", aiAccessRequired: Boolean(process.env.BRIDGEFOX_ACCESS_TOKEN), features: { webFetch: "checked on connection", sandbox: "checked on connection", routing: "configured in Otari", budgets: "configure an Otari key spend ceiling" } };
 }
 export type GatewayResponse = { body: Record<string, any>; activity: Activity };
 export class GatewayError extends Error { constructor(message: string, public activity: Activity) { super(message); } }

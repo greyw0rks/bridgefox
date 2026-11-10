@@ -4,6 +4,8 @@
 
 A compatibility studio that helps port Chrome extension **source** into a reviewable Firefox add-on candidate. Import a ZIP or a small public GitHub repository, inspect compatibility findings, generate changes, review source side by side, and export a ZIP for temporary Firefox testing.
 
+Try the full studio at **https://bridgefox.vercel.app**. Import, local migration, review, and export are public; Otari execution requires the workspace password.
+
 ## Run locally
 
 Requires Node.js 22.22.2 or newer.
@@ -80,7 +82,7 @@ BridgeFox is a migration tool, not a Chrome runtime inside Firefox. Static check
 
 ZIP and GitHub imports accept archives up to **100 MB**, **256 MB extracted**, **64 MB per file**, and **5,000 entries** (binary MB/MiB). Traversal, duplicate paths, symlinks, encrypted ZIPs, and extraction limits are checked during import. Errors identify the oversized file or extracted total. The browser sends project references for analysis, migration and export; binary bytes stay in the local server's memory and are preserved in downloads. Direct API requests still accept complete projects within a 512 MiB JSON limit. These are application limits; a hosting platform or reverse proxy can impose a smaller upload limit.
 
-The local project store holds at most four projects and 512 MiB of expanded files. Imports expire after 30 minutes of inactivity, on eviction, or when the app restarts; expired requests return a clear re-upload message. Keep the original ZIP. Project references require one persistent Node.js process; deployments with separate instances need shared project storage. This store does not provide durable accounts or storage.
+The local project store holds at most four projects and 512 MiB of expanded files. Imports expire after 30 minutes of inactivity, on eviction, or when the local app restarts; expired requests return a clear re-upload message. Keep the original ZIP. The hosted studio uses Convex for shared project records, source files, direct ZIP uploads, and exported downloads. This lets separate Vercel requests load the same project and avoids Vercel's upload body limit. The same four-project, expanded-byte, and inactivity limits apply across the hosted workspace; it does not provide durable accounts or per-user storage. Abandoned uploads and exports are cleaned automatically.
 
 Source repositories with TypeScript, package build scripts, and browser manifest templates are imported for source analysis. Choose the template in **Manifest for analysis**; Chrome MV3 is selected first when available. The complete repository is preserved. The virtual root manifest exists only for analysis and is excluded from **Download reviewed source ZIP**. Source exports remain available with unresolved findings, and must be reviewed and built before installation. Rabby's source ZIP fits these limits; its existing Firefox manifest is a template, not proof of compatibility.
 
