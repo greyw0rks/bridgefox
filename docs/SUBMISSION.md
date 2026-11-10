@@ -6,7 +6,7 @@ One-line description: A compatibility studio that analyzes Chrome extension sour
 
 Branch: `hackathon/bridgefox`.
 
-The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cutoff timezone in the official submission form. Live two-model and sandbox evidence is recorded. Public source is at https://github.com/greyw0rks/bridgefox and the full studio is at https://bridgefox.vercel.app. The registration email, participant videos, feedback, and submission confirmation remain pending. The seven requested fields are collected in [SUBMISSION-FIELDS.md](SUBMISSION-FIELDS.md).
+The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cutoff timezone in the official submission form. Live two-model and sandbox evidence is recorded. Public source is at https://github.com/greyw0rks/bridgefox and the full studio is at https://bridgefox.vercel.app. The registration email, participant video URL, feedback delivery, and submission confirmation remain pending. The eight requested fields are collected in [SUBMISSION-FIELDS.md](SUBMISSION-FIELDS.md).
 
 ## Before submitting
 

@@ -1,6 +1,6 @@
 # BridgeFox submission fields
 
-Required fields, as specified by the participant on November 10, 2026: logo, build name, brief description, GitHub repository, demo video, website, and logo description.
+Required fields, as specified by the participant on November 10, 2026: logo, build name, brief description, long description, GitHub repository, demo video, website, and logo description. The long description must cover the build, problem, how it works, key features, and tech stack.
 
 ## Logo
 
@@ -12,7 +12,11 @@ BridgeFox
 
 ## Brief description
 
-BridgeFox helps developers bring Chrome extensions to Firefox. Import extension source, inspect compatibility issues, use Otari to propose migration changes, review the diff, and export a Firefox add-on candidate for testing.
+BridgeFox helps developers bring Chrome extensions to Firefox so users, especially crypto users, have more browser options. Analyze extension source, review migration proposals, and export Firefox candidates for testing.
+
+## Long description
+
+Copy the full text from [BUILD-DESCRIPTION.md](BUILD-DESCRIPTION.md). It covers the problem, workflow, key features, technology, verified example, and practical limits.
 
 ## GitHub repository
 
