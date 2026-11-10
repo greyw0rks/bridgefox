@@ -1,0 +1,19 @@
+{
+  "testedAt": "2026-11-10T17:55:36.872Z",
+  "base": "https://bridgefox.vercel.app",
+  "checks": [
+    "Overview at 1440/1024/768/390/360 without horizontal overflow",
+    "Protected Otari access has an available password field",
+    "Three functional palettes, quick cycling, native settings dialog, and saved preferences",
+    "Decorative Framer Motion runs when enabled, stops when paused, and honors reduced motion",
+    "Demo import, manifest findings, Mozilla API members and permissions",
+    "Streamed local migration with real source diff and activity",
+    "Source search, empty results, file selection, unified additions/removals, and editor focus",
+    "Workspace responsive at desktop/tablet/mobile",
+    "Candidate ZIP downloads and runtime test remains explicitly open",
+    "Actual local history, search, and accessible modal dismissal",
+    "ZIP upload via the actual import endpoint"
+  ],
+  "errors": [],
+  "liveOtariCalls": 0
+}

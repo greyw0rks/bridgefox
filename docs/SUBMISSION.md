@@ -44,10 +44,12 @@ The included example is an original MIT-licensed project fixture. Its local migr
 - Reproduce what failed or cost time. Include the HTTP 402 setup experience if relevant; identify its confirmed cause only after checking the dashboard.
 - Describe what was missing and what you would change.
 
-## Written feedback — participant answers required
+## Written feedback
+
+Ready draft: [OTARI-FEEDBACK.md](OTARI-FEEDBACK.md), based on the recorded integration and requested by the participant. Include it in the actual submission; preparing this file does not establish that it was submitted.
 
 1. When were you most tempted to bypass Otari and call a provider directly? What happened?
 2. What did you build yourself that Otari should have done for you?
 3. Without the requirement, would you continue using Otari? Why or why not?
 
-These answers must reflect the participant’s experience. They are intentionally not fabricated here.
+The draft uses recorded setup and integration incidents; no new Otari issues, PRs, or gateway capabilities are claimed.
