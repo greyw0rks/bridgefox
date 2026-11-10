@@ -12,7 +12,7 @@ BridgeFox
 
 ## Brief description
 
-BridgeFox helps developers bring Chrome extensions to Firefox so users, especially crypto users, have more browser options. Analyze extension source, review migration proposals, and export Firefox candidates for testing.
+Missing or limited crypto extension support can keep users tied to Chrome. BridgeFox helps developers bring extensions to Firefox through compatibility analysis, reviewed migration proposals, and exports for testing.
 
 ## Long description
 

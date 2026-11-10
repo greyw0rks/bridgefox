@@ -1,8 +1,8 @@
 # BridgeFox build description
 
-For crypto users, browser choice often depends on the extensions they use for wallets, dApps, and security tools. When a needed extension is available only on Chrome or has limited Firefox support, switching to Firefox can mean losing a familiar workflow. This extension gap can discourage Firefox adoption even among people who want more browser choice.
+People who rely on browser extensions can hesitate to switch to Firefox when the tools they need are missing or have limited support. For crypto users, this can mean losing access to a preferred wallet, dApp integration, or security tool. When those extensions prioritize Chrome and other Chromium browsers, users can feel tied to that ecosystem even if they would prefer Firefox. The crypto extension gap becomes a barrier to Firefox adoption.
 
-BridgeFox addresses this problem by helping developers bring Chrome extension source to Firefox. It is a migration studio that combines compatibility analysis, migration proposals, source review, and candidate packaging in one workspace. The goal is to make Firefox a more practical option for users whose browser choice is constrained by extension availability, with crypto extension portability as a key use case.
+BridgeFox addresses this barrier by helping developers bring Chrome extension source to Firefox. Its migration studio combines compatibility analysis, migration proposals, source review, and candidate packaging in one workspace. By making extension portability easier to assess and implement, BridgeFox aims to expand the tools available on Firefox and make it a more practical choice for everyday users and crypto users.
 
 Chrome and Firefox both support WebExtensions, but their manifests, background execution models, and API support can differ. BridgeFox helps developers inspect those differences, preserve permissions and assets, and review proposed changes before testing the result.
 

@@ -2,7 +2,7 @@
 
 Project: **BridgeFox — Chrome extensions. Firefox freedom.**
 
-One-line description: A compatibility studio that analyzes Chrome extension source, proposes Firefox migration changes, and exports reviewable add-on candidates using Otari for an AI engineering workflow.
+One-line description: BridgeFox helps developers bring Chrome extensions to Firefox, addressing the limited crypto extension support that can keep wallet and dApp users tied to Chromium browsers.
 
 Branch: `hackathon/bridgefox`.
 
@@ -28,7 +28,7 @@ The user-provided deadline is November 11 at 11:59 PM. Confirm the event’s cut
 
 ## Project recording outline (3–5 minutes)
 
-1. Explain the real portability problem and the tool’s limited compatibility promise (20–30 seconds).
+1. Explain how missing or limited crypto extension support can discourage Firefox adoption, and how BridgeFox helps developers address that gap (20–30 seconds).
 2. Import the original Tab Pocket Chrome ZIP; show its MV3 service worker and the compatibility findings (30–40 seconds).
 3. Run a genuine Otari migration or show its retained report. Show distinct analyst/engineer models and explain that web fetch is currently disabled, with bundled Mozilla references used instead. Claim routing/fallback/guardrails only if subsequently demonstrated (60–90 seconds).
 4. Inspect the manifest/source diff and permission preservation. Show the real sandbox response and known costs (30–45 seconds).
